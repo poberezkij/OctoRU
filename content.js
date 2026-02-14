@@ -801,7 +801,78 @@ const SAFE_NON_UI_TRANSLATION_KEYS = new Set([
   "releases",
   "packages"
 ]);
+const RELATIVE_TIME_SINGLE_TRANSLATIONS = new Map([
+  ["just now", "только что"],
+  ["a minute ago", "минуту назад"],
+  ["an hour ago", "час назад"],
+  ["a day ago", "день назад"],
+  ["a week ago", "неделю назад"],
+  ["a month ago", "месяц назад"],
+  ["a year ago", "год назад"],
+  ["yesterday", "вчера"]
+]);
 
+const OBSERVED_RELATIVE_TIME_SHADOW_ROOTS = new WeakSet();
+
+function pluralRu(count, one, few, many) {
+  const n = Math.abs(Number(count)) % 100;
+  const n1 = n % 10;
+  if (n > 10 && n < 20) return many;
+  if (n1 > 1 && n1 < 5) return few;
+  if (n1 === 1) return one;
+  return many;
+}
+
+function translateRelativeTimeFallback(raw) {
+  const source = norm(raw);
+  if (!source) return null;
+
+  const direct = RELATIVE_TIME_SINGLE_TRANSLATIONS.get(source.toLowerCase());
+  if (direct) return direct;
+
+  const m = source.match(/^(\d+)\s+(second|seconds|minute|minutes|hour|hours|day|days|week|weeks|month|months|year|years)\s+ago$/i);
+  if (!m) return null;
+
+  const count = Number(m[1]);
+  const unit = m[2].toLowerCase();
+  const forms = {
+    second: ["секунду", "секунды", "секунд"],
+    seconds: ["секунду", "секунды", "секунд"],
+    minute: ["минуту", "минуты", "минут"],
+    minutes: ["минуту", "минуты", "минут"],
+    hour: ["час", "часа", "часов"],
+    hours: ["час", "часа", "часов"],
+    day: ["день", "дня", "дней"],
+    days: ["день", "дня", "дней"],
+    week: ["неделю", "недели", "недель"],
+    weeks: ["неделю", "недели", "недель"],
+    month: ["месяц", "месяца", "месяцев"],
+    months: ["месяц", "месяца", "месяцев"],
+    year: ["год", "года", "лет"],
+    years: ["год", "года", "лет"]
+  };
+  const selected = forms[unit];
+  if (!selected) return null;
+
+  return `${count} ${pluralRu(count, selected[0], selected[1], selected[2])} назад`;
+}
+
+function localizeRelativeTimeShadowText(el) {
+  const root = el?.shadowRoot;
+  if (!root) return;
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    const current = node.nodeValue;
+    if (!current || !current.trim()) continue;
+
+    const translated = translateStringKeepingPunctuation(current) || translateRelativeTimeFallback(current);
+    if (translated && translated !== current) {
+      node.nodeValue = translated;
+    }
+  }
+}
 function canTranslateOutsideUi(base, el) {
   const key = String(base || "").toLowerCase();
   if (!key) return false;
@@ -832,13 +903,20 @@ function localizeRelativeTimeElements(root) {
     if (!el || el.nodeType !== Node.ELEMENT_NODE) continue;
     if (el.getAttribute("lang") !== "ru") {
       el.setAttribute("lang", "ru");
-      // Триггерим пересчет отображения даты/времени после смены локали.
       const dt = el.getAttribute("datetime");
       if (dt != null) el.setAttribute("datetime", dt);
     }
+
+    localizeRelativeTimeShadowText(el);
+
+    const shadow = el.shadowRoot;
+    if (shadow && !OBSERVED_RELATIVE_TIME_SHADOW_ROOTS.has(shadow)) {
+      OBSERVED_RELATIVE_TIME_SHADOW_ROOTS.add(shadow);
+      const shadowObserver = new MutationObserver(() => localizeRelativeTimeShadowText(el));
+      shadowObserver.observe(shadow, { childList: true, subtree: true, characterData: true });
+    }
   }
 }
-
 function fillTemplates(templates, vars) {
   return templates
     .map((t) =>

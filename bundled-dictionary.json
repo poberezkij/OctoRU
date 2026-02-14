@@ -2715,5 +2715,14 @@
   "Total reactions": "Всего реакций",
   "stars": "звёзд",
   "watching": "отслеживаний",
-  "forks": "форков"
+  "forks": "форков",
+  "No description, website, or topics provided": "Описание, сайт или темы не указаны",
+  "No description, website, or topics provided.": "Описание, сайт или темы не указаны.",
+  "No releases published": "Релизы не опубликованы",
+  "No packages published": "Пакеты не опубликованы",
+  "Create a new fork": "Создать новый форк",
+  "Existing forks": "Существующие форки",
+  "Fork your own copy of": "Создайте свой форк для",
+  "You don't have any forks of this repository": "У вас нет форков этого репозитория",
+  "You don't have any forks of this repository.": "У вас нет форков этого репозитория."
 }

@@ -1,6 +1,6 @@
 {
   "name": "octoru-github-na-russkom",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "private": true,
   "scripts": {
     "dict:build": "node scripts/build-dictionary.js __empty__ dict-sections bundled-dictionary.json && node scripts/update-dict-version.js bundled-dictionary.json dict-version.json dict-changelog.md",
@@ -18,6 +18,6 @@
     "test:e2e:smoke": "node scripts/e2e-smoke.js",
     "test:boundaries": "node scripts/test-boundary-fixtures.js",
     "release:check": "npm run dev:check",
-    "release:zip": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"New-Item -ItemType Directory -Force dist | Out-Null; $files = @('manifest.json','background.js','content.js','content-dynamic-rules.js','default-translations.js','options.html','options.js','popup.html','popup.js','bundled-dictionary.json','icon48.png','icon128.png'); Compress-Archive -Path $files -DestinationPath 'dist/OctoRU-v2.1.1.zip' -Force\""
+    "release:zip": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"New-Item -ItemType Directory -Force dist | Out-Null; $files = @('manifest.json','background.js','content.js','content-dynamic-rules.js','default-translations.js','options.html','options.js','popup.html','popup.js','bundled-dictionary.json','icon48.png','icon128.png'); Compress-Archive -Path $files -DestinationPath 'dist/OctoRU-v2.1.2.zip' -Force\""
   }
 }
