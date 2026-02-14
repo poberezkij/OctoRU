@@ -792,7 +792,14 @@ const SAFE_NON_UI_TRANSLATION_KEYS = new Set([
   "no packages published",
   "report repository",
   "readme",
-  "activity"
+  "activity",
+  "stars",
+  "star",
+  "watching",
+  "forks",
+  "fork",
+  "releases",
+  "packages"
 ]);
 
 function canTranslateOutsideUi(base, el) {
