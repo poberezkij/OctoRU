@@ -172,7 +172,7 @@ window.GHRU_DEFAULT_TRANSLATIONS = {
   "You don't have any forks of this repository.": "У этого репозитория пока нет форков.",
   "No forks yet": "Форков пока нет",
   "{N} stars": "{N} звёзд",
-  "{N} watching": "{N} наблюдает",
+  "{N} watching": "{N} отслеживаний",
   "{N} forks": "{N} форков",
 
   // Счётчики уведомлений
@@ -182,7 +182,7 @@ window.GHRU_DEFAULT_TRANSLATIONS = {
 
   // Прочее
   "README": "README",
-  "Readme": "README",
+  "Readme": "Прочти меня",
   "Activity": "Активность",
   "Report repository": "Пожаловаться на репозиторий",
   "No description, website, or topics provided.": "Описание, сайт и темы не указаны.",
