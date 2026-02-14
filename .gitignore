@@ -1,0 +1,11 @@
+﻿# Temporary translation work files
+incoming-translations.json
+incoming-translations.cleaned.json
+staging-translations.json
+last-import-report.json
+translation-audit-report.json
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+.vscode/

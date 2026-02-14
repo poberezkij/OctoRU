@@ -1,0 +1,224 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg-canvas: #f6f8fa;
+      --bg-card: #ffffff;
+      --bg-subtle: #f6f8fa;
+      --fg-default: #1f2328;
+      --fg-muted: #59636e;
+      --border-default: #d0d7de;
+      --accent: #0969da;
+      --accent-strong: #0550ae;
+      --success: #1a7f37;
+      --danger: #cf222e;
+      --focus: rgba(9, 105, 218, 0.24);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-canvas: #0d1117;
+        --bg-card: #161b22;
+        --bg-subtle: #21262d;
+        --fg-default: #c9d1d9;
+        --fg-muted: #8b949e;
+        --border-default: #30363d;
+        --accent: #58a6ff;
+        --accent-strong: #79c0ff;
+        --success: #3fb950;
+        --danger: #ff7b72;
+        --focus: rgba(88, 166, 255, 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 360px;
+      min-height: 300px;
+      background: var(--bg-canvas);
+      color: var(--fg-default);
+      font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    }
+
+    .wrap {
+      padding: 12px;
+      background: radial-gradient(280px 140px at 100% -40px, rgba(9, 105, 218, 0.18), transparent 70%);
+    }
+
+    .panel {
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      background: var(--bg-card);
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-default);
+      background: var(--bg-subtle);
+    }
+
+    .mark {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #6cb6ff);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+      flex: 0 0 auto;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .body {
+      padding: 14px;
+    }
+
+    .status-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      background: var(--bg-subtle);
+      margin-bottom: 12px;
+    }
+
+    .status-text {
+      font-size: 13px;
+      color: var(--fg-muted);
+    }
+
+    #status {
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    #status[data-state="on"] { color: var(--success); }
+    #status[data-state="off"] { color: var(--danger); }
+
+    .switch {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      flex: 0 0 auto;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border: 1px solid var(--border-default);
+      border-radius: 999px;
+      background: var(--bg-card);
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--fg-muted) 70%, #fff);
+      transition: .18s ease;
+    }
+
+    input:checked + .slider {
+      border-color: color-mix(in srgb, var(--success) 60%, var(--border-default));
+      background: color-mix(in srgb, var(--success) 16%, var(--bg-card));
+    }
+
+    input:checked + .slider::before {
+      transform: translateX(18px);
+      background: var(--success);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 9px 12px;
+      margin-top: 8px;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      background: var(--bg-subtle);
+      color: var(--fg-default);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color .15s ease, border-color .15s ease;
+    }
+
+    .btn:hover { border-color: var(--fg-muted); }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 70%, var(--border-default));
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: var(--accent-strong); }
+
+    .muted {
+      margin-top: 10px;
+      color: var(--fg-muted);
+      font-size: 12px;
+      line-height: 1.45;
+      border-top: 1px dashed var(--border-default);
+      padding-top: 10px;
+    }
+
+    .btn:focus-visible,
+    .switch input:focus-visible + .slider {
+      outline: none;
+      box-shadow: 0 0 0 3px var(--focus);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <div class="header">
+        <span class="mark" aria-hidden="true"></span>
+        <h1 class="title">GitHub Переводчик</h1>
+      </div>
+
+      <div class="body">
+        <div class="status-wrap">
+          <div class="status-text">Статус: <span id="status">Активен</span></div>
+          <label class="switch" aria-label="Включить или выключить перевод">
+            <input type="checkbox" id="toggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <button class="btn btn-primary" id="openOptions">Открыть настройки</button>
+        <button class="btn" id="reportUntranslated">Сообщить о непереведенном тексте</button>
+
+        <div class="muted">
+          Переводится только интерфейс GitHub. Код, README, диффы и комментарии пользователей остаются без изменений.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+﻿{
+  "repo_home": [
+    "Home",
+    "Feed",
+    "Popular repositories",
+    "Show more",
+    "Filter"
+  ],
+  "issues": [
+    "Author",
+    "Label",
+    "Milestone",
+    "New issue",
+    "No results",
+    "Try adjusting your search filters."
+  ],
+  "pr": [
+    "Pull requests",
+    "Open",
+    "Closed",
+    "Merged",
+    "New pull request"
+  ],
+  "settings": [
+    "Settings",
+    "General",
+    "Collaborators",
+    "Security",
+    "Actions"
+  ],
+  "other": [
+    "Search GitHub",
+    "Notifications",
+    "Profile",
+    "Sign out"
+  ]
+}

@@ -1,0 +1,471 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub Переводчик - Настройки</title>
+  <style>
+    :root {
+      --bg-canvas: #f6f8fa;
+      --bg-card: #ffffff;
+      --bg-subtle: #f6f8fa;
+      --bg-inset: #f3f4f6;
+      --fg-default: #1f2328;
+      --fg-muted: #59636e;
+      --fg-subtle: #6e7781;
+      --border-default: #d0d7de;
+      --border-muted: #d8dee4;
+      --accent: #0969da;
+      --accent-strong: #0550ae;
+      --success: #1a7f37;
+      --danger: #cf222e;
+      --focus: rgba(9, 105, 218, 0.24);
+      --shadow: 0 1px 0 rgba(31, 35, 40, 0.04), 0 1px 3px rgba(31, 35, 40, 0.08);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-canvas: #0d1117;
+        --bg-card: #161b22;
+        --bg-subtle: #161b22;
+        --bg-inset: #010409;
+        --fg-default: #c9d1d9;
+        --fg-muted: #8b949e;
+        --fg-subtle: #6e7681;
+        --border-default: #30363d;
+        --border-muted: #21262d;
+        --accent: #58a6ff;
+        --accent-strong: #79c0ff;
+        --success: #3fb950;
+        --danger: #ff7b72;
+        --focus: rgba(88, 166, 255, 0.3);
+        --shadow: none;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(1000px 340px at 50% -120px, rgba(9, 105, 218, 0.12), transparent 70%), var(--bg-canvas);
+      color: var(--fg-default);
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px 16px 36px;
+    }
+
+    .hero {
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      background: linear-gradient(180deg, var(--bg-card), var(--bg-subtle));
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      font-weight: 700;
+    }
+
+    .hero-subtitle {
+      margin: 8px 0 0;
+      color: var(--fg-muted);
+      font-size: 13px;
+    }
+
+    .card {
+      margin: 0 0 16px;
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      background: var(--bg-card);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section-title {
+      margin: 0;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-muted);
+      font-size: 15px;
+      font-weight: 600;
+      background: var(--bg-subtle);
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    .hint {
+      color: var(--fg-muted);
+      font-size: 12px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      border-top: 1px solid var(--border-muted);
+      cursor: pointer;
+      transition: background-color .15s ease;
+    }
+
+    .toggle-row:first-child { border-top: 0; }
+    .toggle-row:hover { background: var(--bg-subtle); }
+
+    .toggle-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--fg-default);
+    }
+
+    .toggle-desc {
+      margin: 4px 0 0;
+      color: var(--fg-muted);
+      font-size: 12px;
+      max-width: 700px;
+    }
+
+    .toggle-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      color: var(--fg-subtle);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .toggle-control::before { content: "Выкл."; }
+    .toggle-row:has(input:checked) .toggle-control::before { content: "Вкл."; color: var(--success); }
+
+    .switch {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      flex: 0 0 auto;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border: 1px solid var(--border-default);
+      border-radius: 999px;
+      background: var(--bg-inset);
+      transition: .18s ease;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--fg-subtle);
+      transition: .18s ease;
+    }
+
+    input:checked + .slider {
+      border-color: color-mix(in srgb, var(--success) 50%, var(--border-default));
+      background: color-mix(in srgb, var(--success) 20%, var(--bg-inset));
+    }
+
+    input:checked + .slider::before {
+      transform: translateX(18px);
+      background: var(--success);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      margin-top: 10px;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: var(--bg-inset);
+      color: var(--fg-default);
+      font: 12px/1.45 SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      resize: vertical;
+    }
+
+    textarea:focus-visible,
+    .btn:focus-visible,
+    select:focus-visible {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--focus);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn,
+    select.btn {
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      background: var(--bg-subtle);
+      color: var(--fg-default);
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      line-height: 20px;
+      transition: background-color .15s ease, border-color .15s ease;
+    }
+
+    .btn:hover,
+    select.btn:hover { border-color: var(--fg-subtle); }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 70%, var(--border-default));
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: var(--accent-strong); }
+
+    .btn-danger {
+      border-color: color-mix(in srgb, var(--danger) 55%, var(--border-default));
+      color: var(--danger);
+      background: var(--bg-card);
+    }
+
+    .btn-danger:hover { background: color-mix(in srgb, var(--danger) 10%, var(--bg-card)); }
+
+    .status-wrap {
+      margin-top: 12px;
+      min-height: 26px;
+    }
+
+    #status {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      border: 1px solid transparent;
+    }
+
+    .ok {
+      color: var(--success);
+      border-color: color-mix(in srgb, var(--success) 35%, var(--border-default));
+      background: color-mix(in srgb, var(--success) 10%, transparent);
+    }
+
+    .err {
+      color: var(--danger);
+      border-color: color-mix(in srgb, var(--danger) 35%, var(--border-default));
+      background: color-mix(in srgb, var(--danger) 10%, transparent);
+    }
+
+    code {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-size: 12px;
+      color: var(--fg-default);
+    }
+
+    .coverage-box {
+      margin-top: 10px;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      background: var(--bg-inset);
+      padding: 10px 12px;
+      font: 12px/1.45 SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      white-space: pre-wrap;
+    }
+
+    .admin-only { display: none; }
+    body.admin-mode .admin-only { display: block; }
+    body.admin-mode .admin-only.toggle-row { display: flex; }
+
+    @media (max-width: 760px) {
+      .toggle-row { align-items: flex-start; }
+      .toggle-control { margin-top: 2px; }
+      .hero-title { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <h1 class="hero-title">Настройки GitHub Переводчика</h1>
+      <p class="hero-subtitle">Интерфейс и поведение расширения в стиле GitHub: просто, чисто и без лишних шагов.</p>
+    </header>
+
+    <section class="card">
+      <h2 class="section-title">Режим работы</h2>
+      <div class="card-body">
+        <div class="hint" id="modeHint">Обычный режим: только базовые настройки для пользователя.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">Основные настройки</h2>
+      <div>
+        <label class="toggle-row">
+          <div>
+            <p class="toggle-title">Переводить подсказки</p>
+            <p class="toggle-desc">Включает перевод <code>title</code>, <code>aria-label</code> и <code>placeholder</code>.</p>
+          </div>
+          <div class="toggle-control">
+            <span class="switch"><input type="checkbox" id="translateAttributes"><span class="slider"></span></span>
+          </div>
+        </label>
+
+        <label class="toggle-row admin-only">
+          <div>
+            <p class="toggle-title">Глоссарий терминов</p>
+            <p class="toggle-desc">Оставляет английский термин и добавляет краткое пояснение на русском.</p>
+          </div>
+          <div class="toggle-control">
+            <span class="switch"><input type="checkbox" id="glossaryMode"><span class="slider"></span></span>
+          </div>
+        </label>
+
+        <label class="toggle-row admin-only">
+          <div>
+            <p class="toggle-title">Сбор непереведенных строк</p>
+            <p class="toggle-desc">Собирает только UI-строки для расширения словаря.</p>
+          </div>
+          <div class="toggle-control">
+            <span class="switch"><input type="checkbox" id="collectUntranslated"><span class="slider"></span></span>
+          </div>
+        </label>
+
+        <label class="toggle-row admin-only">
+          <div>
+            <p class="toggle-title">Сборщик без фильтров</p>
+            <p class="toggle-desc">Отключает правила фильтрации и собирает максимум непереведенных строк (может быть больше шума).</p>
+          </div>
+          <div class="toggle-control">
+            <span class="switch"><input type="checkbox" id="collectorRelaxedMode"><span class="slider"></span></span>
+          </div>
+        </label>
+
+        <label class="toggle-row">
+          <div>
+            <p class="toggle-title">Строгий режим только UI</p>
+            <p class="toggle-desc">Переводит только системные элементы GitHub и исключает пользовательский контент.</p>
+          </div>
+          <div class="toggle-control">
+            <span class="switch"><input type="checkbox" id="strictUiOnlyMode"><span class="slider"></span></span>
+          </div>
+        </label>
+
+        <label class="toggle-row admin-only">
+          <div>
+            <p class="toggle-title">Debug сборщика</p>
+            <p class="toggle-desc">Собирает причины, почему строки отбрасываются фильтром.</p>
+          </div>
+          <div class="toggle-control">
+            <span class="switch"><input type="checkbox" id="debugCollector"><span class="slider"></span></span>
+          </div>
+        </label>
+      </div>
+    </section>
+
+    <section class="card admin-only">
+      <h2 class="section-title">Пользовательский словарь</h2>
+      <div class="card-body">
+        <div class="hint">Формат: <code>{ "English": "Русский" }</code>. Пользовательский словарь имеет приоритет над встроенным.</div>
+        <div class="btn-row">
+          <button class="btn" id="persistBundled">Сохранить встроенный словарь локально</button>
+        </div>
+        <textarea id="customTranslations" spellcheck="false" placeholder='{
+  "Compare": "Сравнить",
+  "Releases": "Релизы"
+}'></textarea>
+      </div>
+    </section>
+
+    <section class="card admin-only">
+      <h2 class="section-title">Непереведенные строки</h2>
+      <div class="card-body">
+        <div class="hint">Список помогает быстро дополнять покрытие интерфейса. Хранится в <code>chrome.storage.local</code>.</div>
+        <div class="btn-row">
+          <button class="btn" id="refreshUntranslated">Обновить список</button>
+          <button class="btn" id="copyUntranslated">Копировать JSON-шаблон</button>
+          <button class="btn" id="startAutoAudit">Авто-проверка GitHub</button>
+          <button class="btn btn-danger" id="stopAutoAudit">Остановить авто-проверку</button>
+          <button class="btn" id="pruneUntranslated">Очистить мусор</button>
+          <button class="btn btn-danger" id="clearUntranslated">Очистить</button>
+        </div>
+        <div class="hint" id="autoAuditStatus">Авто-проверка: не запущена</div>
+        <textarea id="untranslated" spellcheck="false" readonly placeholder="Здесь появятся непереведенные строки..."></textarea>
+      </div>
+    </section>
+
+    <section class="card admin-only">
+      <h2 class="section-title">Покрытие перевода</h2>
+      <div class="card-body">
+        <div class="hint">Показывает покрытие по разделам GitHub на основе реально увиденных UI-строк.</div>
+        <div class="btn-row">
+          <button class="btn" id="refreshCoverage">Обновить dashboard</button>
+          <button class="btn" id="copyCoverage">Копировать весь dashboard</button>
+          <button class="btn" id="copyCoverageSection">Копировать раздел</button>
+          <select id="coverageSectionSelect" class="btn">
+            <option value="repo_home">repo_home</option>
+            <option value="issues">issues</option>
+            <option value="pr">pr</option>
+            <option value="settings">settings</option>
+            <option value="other">other</option>
+          </select>
+          <button class="btn btn-danger" id="clearCoverage">Очистить dashboard</button>
+        </div>
+        <div class="coverage-box" id="coverageDashboard">Загрузка...</div>
+      </div>
+    </section>
+
+    <section class="card admin-only">
+      <h2 class="section-title">Debug сборщика</h2>
+      <div class="card-body">
+        <div class="hint">Показывает статистику причин отбраковки строк в фильтре.</div>
+        <div class="btn-row">
+          <button class="btn" id="refreshCollectorDebug">Обновить debug</button>
+          <button class="btn btn-danger" id="clearCollectorDebug">Очистить debug</button>
+        </div>
+        <div class="coverage-box" id="collectorDebugDashboard">Загрузка...</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-body">
+        <div class="btn-row">
+          <button class="btn btn-primary" id="save">Сохранить</button>
+          <button class="btn btn-danger admin-only" id="reset">Сбросить (очистить пользовательский словарь)</button>
+        </div>
+        <div class="status-wrap">
+          <span id="status" class="hint"></span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
