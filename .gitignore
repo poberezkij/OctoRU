@@ -9,3 +9,6 @@ translation-audit-report.json
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Release artifacts
+dist/*.zip

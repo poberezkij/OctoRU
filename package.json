@@ -17,6 +17,7 @@
     "dev:check": "npm run syntax:check && npm run test:boundaries && npm run dict:check && npm run dict:lint:quality",
     "test:e2e:smoke": "node scripts/e2e-smoke.js",
     "test:boundaries": "node scripts/test-boundary-fixtures.js",
-    "release:check": "npm run dev:check"
+    "release:check": "npm run dev:check",
+    "release:zip": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"New-Item -ItemType Directory -Force dist | Out-Null; $files = @('manifest.json','background.js','content.js','content-dynamic-rules.js','default-translations.js','options.html','options.js','popup.html','popup.js','bundled-dictionary.json','icon48.png','icon128.png'); Compress-Archive -Path $files -DestinationPath 'dist/OctoRU-v2.1.0.zip' -Force\""
   }
 }
