@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build bundled dictionary
+        run: npm run dict:build
+
+      - name: Prepare release artifact
+        run: |
+          mkdir -p dist
+          zip -r "dist/OctoRU-${GITHUB_REF_NAME}.zip" \
+            manifest.json \
+            background.js \
+            content.js \
+            content-dynamic-rules.js \
+            default-translations.js \
+            options.html \
+            options.js \
+            popup.html \
+            popup.js \
+            bundled-dictionary.json \
+            icon48.png \
+            icon128.png
+
+      - name: Resolve release notes
+        id: notes
+        shell: bash
+        run: |
+          if [ -f "RELEASE_NOTES_${GITHUB_REF_NAME}.md" ]; then
+            echo "path=RELEASE_NOTES_${GITHUB_REF_NAME}.md" >> "$GITHUB_OUTPUT"
+          elif [ -f "RELEASE_NOTES_${GITHUB_REF_NAME#v}.md" ]; then
+            echo "path=RELEASE_NOTES_${GITHUB_REF_NAME#v}.md" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create GitHub Release
+        if: ${{ steps.notes.outputs.path != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "OctoRU ${GITHUB_REF_NAME}"
+          draft: false
+          prerelease: false
+          body_path: ${{ steps.notes.outputs.path }}
+          files: |
+            dist/OctoRU-${{ github.ref_name }}.zip
+
+      - name: Create GitHub Release (no notes file)
+        if: ${{ steps.notes.outputs.path == '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "OctoRU ${GITHUB_REF_NAME}"
+          draft: false
+          prerelease: false
+          body: |
+            Release ${{ github.ref_name }}
+          files: |
+            dist/OctoRU-${{ github.ref_name }}.zip

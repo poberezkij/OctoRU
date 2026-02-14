@@ -7,6 +7,7 @@
 ![Chrome](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white)
 ![Manifest](https://img.shields.io/badge/Manifest-v3-0F9D58)
 ![UI-only](https://img.shields.io/badge/Mode-UI--only-24292F)
+[![Releases](https://img.shields.io/github/v/release/poberezkij/OctoRU?display_name=tag)](https://github.com/poberezkij/OctoRU/releases)
 
 ## 🔍 Поисковые фразы
 - Перевод GitHub на русский
