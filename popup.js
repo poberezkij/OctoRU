@@ -1,4 +1,7 @@
 ﻿document.addEventListener('DOMContentLoaded', () => {
+  const MAINTAINER_PROFILE_URL = 'https://github.com/poberezkij';
+  const REPO_ISSUES_NEW_URL = 'https://github.com/poberezkij/OctoRU/issues/new';
+
   const toggle = document.getElementById('toggle');
   const status = document.getElementById('status');
   const openOptions = document.getElementById('openOptions');
@@ -6,7 +9,7 @@
 
   function setUi(isEnabled) {
     toggle.checked = isEnabled;
-    status.textContent = isEnabled ? '\u0410\u043a\u0442\u0438\u0432\u0435\u043d' : '\u041d\u0435\u0430\u043a\u0442\u0438\u0432\u0435\u043d';
+    status.textContent = isEnabled ? 'Активен' : 'Неактивен';
     status.dataset.state = isEnabled ? 'on' : 'off';
   }
 
@@ -37,17 +40,31 @@
       if (!tabId) return;
 
       chrome.tabs.sendMessage(tabId, { type: 'ghruBuildUntranslatedReport' }, async (res) => {
-        const selected = (res?.selectedText || '').trim();
+        const selected = String(res?.selectedText || '').trim();
+        const safeSelected = selected || '<вставьте текст>';
+
         const reportText = [
           'Непереведённый текст:',
-          selected || '<вставьте текст>',
+          safeSelected,
           '',
           'Страница:',
-          url
+          url,
+          '',
+          'Профиль:',
+          MAINTAINER_PROFILE_URL
         ].join('\n');
+
+        // Формируем ссылку для создания Issue с заранее заполненным шаблоном.
+        const issueTitle = `Непереведённый текст: ${safeSelected.slice(0, 60)}`;
+        const issueBody = `${reportText}\n\nДополнительно:\n- Браузер: ${navigator.userAgent}`;
+        const issueUrl = `${REPO_ISSUES_NEW_URL}?${new URLSearchParams({
+          title: issueTitle,
+          body: issueBody
+        }).toString()}`;
 
         try {
           await navigator.clipboard.writeText(reportText);
+          chrome.tabs.create({ url: issueUrl });
           reportUntranslated.textContent = 'Скопировано';
           setTimeout(() => {
             reportUntranslated.textContent = 'Сообщить о непереведенном тексте';
@@ -62,4 +79,3 @@
     });
   });
 });
-
