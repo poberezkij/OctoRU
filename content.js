@@ -793,6 +793,20 @@ const SAFE_NON_UI_TRANSLATION_KEYS = new Set([
   "report repository",
   "readme",
   "activity",
+  "branch",
+  "branches",
+  "tag",
+  "tags",
+  "commit",
+  "commits",
+  "public",
+  "local",
+  "clone",
+  "clone using the web url",
+  "open with github desktop",
+  "download zip",
+  "go to file",
+  "type / to search",
   "stars",
   "star",
   "watching",
@@ -876,17 +890,26 @@ function localizeRelativeTimeShadowText(el) {
 function canTranslateOutsideUi(base, el) {
   const key = String(base || "").toLowerCase();
   if (!key) return false;
+  const isSafeShortLabel =
+    SAFE_NON_UI_TRANSLATION_KEYS.has(key) ||
+    /^\d+\s+(stars|forks|watching|branch|branches|tag|tags|commit|commits)$/.test(key);
 
   // Безопасный UI-контекст выпадающих меню GitHub.
   if (el?.closest?.(".SelectMenu, .SelectMenu-modal, .SelectMenu-list, .SelectMenu-item")) {
     return true;
   }
+  if (el?.closest?.("[role='menu'], [role='listbox'], [class*='prc-ActionList']")) {
+    return true;
+  }
+  if (el?.matches?.("input[role='combobox'], input[type='search'], input[type='text']")) {
+    if (isSafeShortLabel) return true;
+  }
 
   // Правая колонка репозитория: переводим только заранее разрешенные нейтральные фразы.
   if (el?.closest?.(".Layout-sidebar, .BorderGrid")) {
-    if (SAFE_NON_UI_TRANSLATION_KEYS.has(key)) return true;
-    if (/^\d+\s+(stars|forks|watching)$/.test(key)) return true;
+    if (isSafeShortLabel) return true;
   }
+  if (isSafeShortLabel && key.length <= 40) return true;
 
   return false;
 }
@@ -1599,5 +1622,3 @@ async function reloadSettingsFromBackground() {
     init().catch(() => void 0);
   }
 })();
-
-
