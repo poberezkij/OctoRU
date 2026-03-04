@@ -57,7 +57,7 @@ jobs:
         if: ${{ steps.notes.outputs.path != '' }}
         uses: softprops/action-gh-release@v2
         with:
-          name: "OctoRU ${GITHUB_REF_NAME}"
+          name: "OctoRU ${{ github.ref_name }}"
           draft: false
           prerelease: false
           body_path: ${{ steps.notes.outputs.path }}
@@ -68,7 +68,7 @@ jobs:
         if: ${{ steps.notes.outputs.path == '' }}
         uses: softprops/action-gh-release@v2
         with:
-          name: "OctoRU ${GITHUB_REF_NAME}"
+          name: "OctoRU ${{ github.ref_name }}"
           draft: false
           prerelease: false
           body: |
