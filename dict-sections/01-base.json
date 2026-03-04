@@ -1305,5 +1305,11 @@
   "Yowza, that's a lot of files. Try uploading fewer than {N} at a time": "Ого, файлов слишком много. Попробуйте загружать меньше {N} за один раз",
   "files": "файлы",
   "of": "из",
-  "test": "тест"
+  "test": "тест",
+  "released": "выпущен",
+  "View changelog": "Журнал изменений",
+  "your repository": "ваш репозиторий",
+  "Co-star your repository": "Поставьте звезду вашему репозиторию",
+  "Read more ↗": "Читать далее ↗",
+  "View changelog ↗": "Журнал изменений ↗"
 }

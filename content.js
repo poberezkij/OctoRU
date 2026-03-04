@@ -883,7 +883,14 @@ const SAFE_NON_UI_TRANSLATION_KEYS = new Set([
   "forks",
   "fork",
   "releases",
-  "packages"
+  "packages",
+  "read more",
+  "view changelog",
+  "view changelog →",
+  "view changelog ↗",
+  "released",
+  "your repository",
+  "co-star your repository"
 ]);
 const RELATIVE_TIME_SINGLE_TRANSLATIONS = new Map([
   ["just now", "только что"],
