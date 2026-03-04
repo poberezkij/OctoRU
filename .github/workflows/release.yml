@@ -20,9 +20,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "npm"
 
-      - name: Build bundled dictionary
-        run: npm run dict:build
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run release checks
+        run: npm run release:check
 
       - name: Prepare release artifact
         run: |

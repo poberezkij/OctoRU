@@ -23,6 +23,7 @@
 - ✅ Локальная работа без внешних API
 - ✅ Автоперевод на динамических страницах GitHub
 - ✅ Сбор непереведённых UI-строк для пополнения словаря
+- ✅ Частотный отчёт непереведённых строк с контекстом (URL/source/selector)
 
 ## 🔎 Что переводит
 - Меню и навигацию
@@ -57,7 +58,9 @@
 - `npm run dict:build` — сборка словаря из `dict-sections`
 - `npm run dict:check` — сборка + валидация + strict lint
 - `npm run dict:lint:quality` — quality-проверка словаря
-- `npm run dev:check` — полный локальный check перед релизом
+- `npm run dev:check` — полный локальный check словаря и рантайма
+- `npm run release:check` — release-check c e2e smoke
+- `npm run release:prepare -- 2.1.5` — bump версии + checks + zip одной командой
 
 Структура проекта:
 - `content.js` — рантайм-перевод на странице
@@ -93,6 +96,7 @@
 - Безопасность: `SECURITY.md`
 - Правила контрибьюта: `CONTRIBUTING.md`
 - Заметки релиза:
+  - `RELEASE_NOTES_v2.1.5.md`
   - `RELEASE_NOTES_v2.1.3.md`
   - `RELEASE_NOTES_v2.1.2.md`
   - `RELEASE_NOTES_v2.1.1.md`

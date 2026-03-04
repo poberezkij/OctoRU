@@ -3,6 +3,7 @@ const SYNC_SETTINGS_KEY = 'ghru_settings_v2';
 const LOCAL_CUSTOM_DICT_KEY = 'ghru_custom_dict_v2';
 const LOCAL_USER_CUSTOM_DICT_KEY = 'ghru_user_custom_dict_v1';
 const LOCAL_UNTRANSLATED_KEY = 'ghru_untranslated_v2';
+const LOCAL_UNTRANSLATED_REPORT_KEY = 'ghru_untranslated_report_v1';
 const LOCAL_COVERAGE_KEY = 'ghru_coverage_v1';
 const LOCAL_COLLECTOR_DEBUG_KEY = 'ghru_collector_debug_v1';
 const SYNC_MIGRATED_KEY = 'ghru_migrated_v2';
@@ -12,6 +13,9 @@ const BUNDLED_DICT_FILE = 'bundled-dictionary.json';
 const BUNDLED_DICT_META_FILE = 'dict-version.json';
 let bundledDictVersion = 'legacy';
 const COVERAGE_SECTION_KEYS = ['repo_home', 'issues', 'pr', 'settings', 'other'];
+const UNTRANSLATED_LIST_MAX = 8000;
+const UNTRANSLATED_REPORT_MAX_ENTRIES = 2500;
+const UNTRANSLATED_REPORT_MAX_CONTEXT = 8;
 
 const DEFAULT_SETTINGS = {
   enabled: true,
@@ -295,6 +299,242 @@ function buildCoverageSummary(payload) {
   };
 }
 
+function normalizePositiveCount(value, fallback = 0) {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return fallback;
+  return Math.min(1000000, Math.max(1, Math.floor(num)));
+}
+
+function trimCounterObject(input, maxSize = UNTRANSLATED_REPORT_MAX_CONTEXT) {
+  const rows = [];
+  if (input && typeof input === 'object' && !Array.isArray(input)) {
+    for (const [rawKey, rawCount] of Object.entries(input)) {
+      const key = String(rawKey || '').trim();
+      if (!key) continue;
+      const count = normalizePositiveCount(rawCount, 0);
+      if (!count) continue;
+      rows.push([key, count]);
+    }
+  }
+  rows.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const out = {};
+  for (const [key, count] of rows.slice(0, Math.max(1, maxSize))) {
+    out[key] = count;
+  }
+  return out;
+}
+
+function bumpCounter(counter, key, by = 1, maxSize = UNTRANSLATED_REPORT_MAX_CONTEXT) {
+  const k = String(key || '').trim();
+  if (!k) return trimCounterObject(counter, maxSize);
+  const out = { ...(counter && typeof counter === 'object' ? counter : {}) };
+  out[k] = (normalizePositiveCount(out[k], 0) || 0) + normalizePositiveCount(by, 1);
+  return trimCounterObject(out, maxSize);
+}
+
+function normalizeCollectorSource(value) {
+  const source = String(value || '').trim().toLowerCase();
+  if (!source) return 'text';
+  if (source.length > 64) return source.slice(0, 64);
+  return source;
+}
+
+function normalizeCollectorUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch (e) {
+    return '';
+  }
+  if (!/^https:$/.test(parsed.protocol)) return '';
+  if (!/^(github\.com|gist\.github\.com)$/i.test(parsed.hostname)) return '';
+  return `${parsed.origin}${parsed.pathname}`;
+}
+
+function normalizeCollectorSelector(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (raw.length > 140) return raw.slice(0, 140);
+  return raw;
+}
+
+function normalizeUntranslatedRows(rows) {
+  if (!Array.isArray(rows)) return [];
+  const merged = new Map();
+  for (const row of rows) {
+    if (!row || typeof row !== 'object') continue;
+    const key = typeof row.key === 'string' ? row.key.trim() : '';
+    if (!key) continue;
+    const count = normalizePositiveCount(row.count, 1);
+    const section = normalizeCoverageSection(row.section);
+    const source = normalizeCollectorSource(row.source);
+    const url = normalizeCollectorUrl(row.url);
+    const selector = normalizeCollectorSelector(row.selector);
+    const sig = `${key}\u0000${section}\u0000${source}\u0000${url}\u0000${selector}`;
+    const prev = merged.get(sig);
+    if (prev) {
+      prev.count += count;
+      continue;
+    }
+    merged.set(sig, { key, count, section, source, url, selector });
+  }
+  return Array.from(merged.values());
+}
+
+function sortUntranslatedEntryKeys(entries) {
+  const keys = Object.keys(entries || {});
+  keys.sort((a, b) => {
+    const ea = entries[a] || {};
+    const eb = entries[b] || {};
+    const countDiff = (eb.count || 0) - (ea.count || 0);
+    if (countDiff) return countDiff;
+    const lastDiff = String(eb.lastSeenAt || '').localeCompare(String(ea.lastSeenAt || ''));
+    if (lastDiff) return lastDiff;
+    return a.localeCompare(b);
+  });
+  return keys;
+}
+
+function normalizeUntranslatedReportEntry(entryRaw) {
+  const row = entryRaw && typeof entryRaw === 'object' ? entryRaw : {};
+  const count = normalizePositiveCount(row.count, 0);
+  if (!count) return null;
+  return {
+    count,
+    firstSeenAt: typeof row.firstSeenAt === 'string' ? row.firstSeenAt : '',
+    lastSeenAt: typeof row.lastSeenAt === 'string' ? row.lastSeenAt : '',
+    sections: trimCounterObject(row.sections),
+    sources: trimCounterObject(row.sources),
+    urls: trimCounterObject(row.urls),
+    selectors: trimCounterObject(row.selectors)
+  };
+}
+
+function normalizeUntranslatedReportPayload(payload) {
+  const out = {};
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return { entries: out, updatedAt: '' };
+  }
+
+  const entries = payload.entries && typeof payload.entries === 'object' ? payload.entries : {};
+  for (const [rawKey, rawEntry] of Object.entries(entries)) {
+    const key = String(rawKey || '').trim();
+    if (!key) continue;
+    if (shouldDropUntranslatedNoise(key)) continue;
+    const normalized = normalizeUntranslatedReportEntry(rawEntry);
+    if (!normalized) continue;
+    out[key] = normalized;
+  }
+
+  const sortedKeys = sortUntranslatedEntryKeys(out).slice(0, UNTRANSLATED_REPORT_MAX_ENTRIES);
+  const trimmed = {};
+  for (const key of sortedKeys) trimmed[key] = out[key];
+
+  return {
+    entries: trimmed,
+    updatedAt: typeof payload.updatedAt === 'string' ? payload.updatedAt : ''
+  };
+}
+
+function buildUntranslatedTemplateFromList(list) {
+  const out = {};
+  const src = Array.isArray(list) ? list : [];
+  for (const row of src) {
+    if (typeof row !== 'string') continue;
+    const key = row.trim();
+    if (!key) continue;
+    out[key] = '';
+  }
+  return out;
+}
+
+function reportRowsFromLegacyItems(items) {
+  const out = [];
+  const src = Array.isArray(items) ? items : [];
+  for (const item of src) {
+    if (typeof item !== 'string') continue;
+    const key = item.trim();
+    if (!key) continue;
+    out.push({
+      key,
+      count: 1,
+      section: 'other',
+      source: 'legacy',
+      url: '',
+      selector: ''
+    });
+  }
+  return normalizeUntranslatedRows(out);
+}
+
+function mergeUntranslatedReport(current, rows) {
+  const normalizedRows = normalizeUntranslatedRows(rows);
+  const data = normalizeUntranslatedReportPayload(current);
+  if (!normalizedRows.length) return data;
+
+  const now = new Date().toISOString();
+  for (const row of normalizedRows) {
+    if (shouldDropUntranslatedNoise(row.key)) continue;
+    const existing = data.entries[row.key] || {
+      count: 0,
+      firstSeenAt: now,
+      lastSeenAt: now,
+      sections: {},
+      sources: {},
+      urls: {},
+      selectors: {}
+    };
+    existing.count += normalizePositiveCount(row.count, 1);
+    if (!existing.firstSeenAt) existing.firstSeenAt = now;
+    existing.lastSeenAt = now;
+    existing.sections = bumpCounter(existing.sections, row.section, row.count);
+    existing.sources = bumpCounter(existing.sources, row.source, row.count);
+    if (row.url) existing.urls = bumpCounter(existing.urls, row.url, row.count);
+    if (row.selector) existing.selectors = bumpCounter(existing.selectors, row.selector, row.count);
+    data.entries[row.key] = existing;
+  }
+
+  const sortedKeys = sortUntranslatedEntryKeys(data.entries).slice(0, UNTRANSLATED_REPORT_MAX_ENTRIES);
+  const trimmed = {};
+  for (const key of sortedKeys) {
+    trimmed[key] = normalizeUntranslatedReportEntry(data.entries[key]);
+  }
+  data.entries = trimmed;
+  data.updatedAt = now;
+  return data;
+}
+
+function buildUntranslatedReportSummary(payload, limitRaw) {
+  const data = normalizeUntranslatedReportPayload(payload);
+  const limit = Math.max(1, Math.min(2000, Number(limitRaw) || 400));
+  const keys = sortUntranslatedEntryKeys(data.entries);
+  const entries = [];
+
+  for (const key of keys.slice(0, limit)) {
+    const row = data.entries[key];
+    if (!row) continue;
+    entries.push({
+      key,
+      count: row.count,
+      firstSeenAt: row.firstSeenAt || '',
+      lastSeenAt: row.lastSeenAt || '',
+      sections: row.sections || {},
+      sources: row.sources || {},
+      urls: row.urls || {},
+      selectors: row.selectors || {}
+    });
+  }
+
+  return {
+    totalUnique: keys.length,
+    updatedAt: data.updatedAt || '',
+    entries,
+    template: buildUntranslatedTemplateFromList(keys)
+  };
+}
+
 function normalizeCollectorDebugPayload(payload) {
   const map = {};
   if (!payload || typeof payload !== 'object') {
@@ -505,6 +745,7 @@ async function getState() {
     [LOCAL_CUSTOM_DICT_KEY]: {},
     [LOCAL_USER_CUSTOM_DICT_KEY]: {},
     [LOCAL_UNTRANSLATED_KEY]: [],
+    [LOCAL_UNTRANSLATED_REPORT_KEY]: {},
     [LOCAL_COVERAGE_KEY]: {},
     [LOCAL_COLLECTOR_DEBUG_KEY]: {}
   });
@@ -512,10 +753,11 @@ async function getState() {
   const customTranslations = normalizeTranslationsDict(localRes[LOCAL_USER_CUSTOM_DICT_KEY]);
   const effectiveTranslations = normalizeTranslationsDict(localRes[LOCAL_CUSTOM_DICT_KEY]);
   const untranslated = Array.isArray(localRes[LOCAL_UNTRANSLATED_KEY]) ? localRes[LOCAL_UNTRANSLATED_KEY] : [];
+  const untranslatedReport = normalizeUntranslatedReportPayload(localRes[LOCAL_UNTRANSLATED_REPORT_KEY]);
   const coverage = normalizeCoveragePayload(localRes[LOCAL_COVERAGE_KEY]);
   const collectorDebug = normalizeCollectorDebugPayload(localRes[LOCAL_COLLECTOR_DEBUG_KEY]);
 
-  return { settings, customTranslations, effectiveTranslations, untranslated, coverage, collectorDebug };
+  return { settings, customTranslations, effectiveTranslations, untranslated, untranslatedReport, coverage, collectorDebug };
 }
 
 async function broadcastToGitHubTabs(message) {
@@ -886,6 +1128,26 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
       return;
     }
 
+    if (type === 'ghruGetUntranslatedReport') {
+      const localRes = await storageGet('local', {
+        [LOCAL_UNTRANSLATED_KEY]: [],
+        [LOCAL_UNTRANSLATED_REPORT_KEY]: {}
+      });
+      const legacyList = Array.isArray(localRes[LOCAL_UNTRANSLATED_KEY]) ? localRes[LOCAL_UNTRANSLATED_KEY] : [];
+      let report = normalizeUntranslatedReportPayload(localRes[LOCAL_UNTRANSLATED_REPORT_KEY]);
+
+      if (!Object.keys(report.entries).length && legacyList.length) {
+        report = mergeUntranslatedReport(report, reportRowsFromLegacyItems(legacyList));
+        await storageSet('local', { [LOCAL_UNTRANSLATED_REPORT_KEY]: report });
+      }
+
+      sendResponse({
+        ok: true,
+        report: buildUntranslatedReportSummary(report, req?.limit)
+      });
+      return;
+    }
+
     if (type === 'ghruGetCoverage') {
       const localRes = await storageGet('local', { [LOCAL_COVERAGE_KEY]: {} });
       const coverage = buildCoverageSummary(localRes[LOCAL_COVERAGE_KEY]);
@@ -901,18 +1163,45 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
     }
 
     if (type === 'ghruClearUntranslated') {
-      await storageSet('local', { [LOCAL_UNTRANSLATED_KEY]: [] });
+      await storageSet('local', {
+        [LOCAL_UNTRANSLATED_KEY]: [],
+        [LOCAL_UNTRANSLATED_REPORT_KEY]: normalizeUntranslatedReportPayload({})
+      });
       sendResponse({ ok: true });
       return;
     }
 
     if (type === 'ghruPruneUntranslated') {
-      const localRes = await storageGet('local', { [LOCAL_UNTRANSLATED_KEY]: [] });
+      const localRes = await storageGet('local', {
+        [LOCAL_UNTRANSLATED_KEY]: [],
+        [LOCAL_UNTRANSLATED_REPORT_KEY]: {}
+      });
       const list = Array.isArray(localRes[LOCAL_UNTRANSLATED_KEY]) ? localRes[LOCAL_UNTRANSLATED_KEY] : [];
+      const report = normalizeUntranslatedReportPayload(localRes[LOCAL_UNTRANSLATED_REPORT_KEY]);
+
       const before = list.length;
       const next = list.filter((k) => !shouldDropUntranslatedNoise(k));
-      await storageSet('local', { [LOCAL_UNTRANSLATED_KEY]: next });
-      sendResponse({ ok: true, before, after: next.length, removed: before - next.length });
+      const nextSet = new Set(next);
+      const prunedEntries = {};
+      for (const [key, entry] of Object.entries(report.entries)) {
+        if (!nextSet.has(key)) continue;
+        prunedEntries[key] = entry;
+      }
+      const prunedReport = normalizeUntranslatedReportPayload({
+        entries: prunedEntries,
+        updatedAt: new Date().toISOString()
+      });
+
+      await storageSet('local', {
+        [LOCAL_UNTRANSLATED_KEY]: next,
+        [LOCAL_UNTRANSLATED_REPORT_KEY]: prunedReport
+      });
+      sendResponse({
+        ok: true,
+        before,
+        after: next.length,
+        removed: before - next.length
+      });
       return;
     }
 
@@ -930,24 +1219,43 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
 
     if (type === 'ghruReportUntranslated') {
       const items = Array.isArray(req?.items) ? req.items : [];
-      if (!items.length) {
+      const rows = normalizeUntranslatedRows(req?.rows);
+      if (!items.length && !rows.length) {
         sendResponse({ ok: true });
         return;
       }
 
-      const localRes = await storageGet('local', { [LOCAL_UNTRANSLATED_KEY]: [] });
+      const localRes = await storageGet('local', {
+        [LOCAL_UNTRANSLATED_KEY]: [],
+        [LOCAL_UNTRANSLATED_REPORT_KEY]: {}
+      });
       const existing = Array.isArray(localRes[LOCAL_UNTRANSLATED_KEY]) ? localRes[LOCAL_UNTRANSLATED_KEY] : [];
       const set = new Set(existing);
+
       for (const s of items) {
         if (typeof s === 'string' && s.trim()) set.add(s.trim());
       }
+      for (const row of rows) {
+        if (!row?.key) continue;
+        set.add(row.key);
+      }
 
-      const MAX = 8000;
       const next = Array.from(set).sort();
-      if (next.length > MAX) next.length = MAX;
+      if (next.length > UNTRANSLATED_LIST_MAX) next.length = UNTRANSLATED_LIST_MAX;
 
-      await storageSet('local', { [LOCAL_UNTRANSLATED_KEY]: next });
-      sendResponse({ ok: true, count: next.length });
+      const legacyRows = reportRowsFromLegacyItems(items);
+      const mergedRows = normalizeUntranslatedRows([...rows, ...legacyRows]);
+      const mergedReport = mergeUntranslatedReport(localRes[LOCAL_UNTRANSLATED_REPORT_KEY], mergedRows);
+
+      await storageSet('local', {
+        [LOCAL_UNTRANSLATED_KEY]: next,
+        [LOCAL_UNTRANSLATED_REPORT_KEY]: mergedReport
+      });
+      sendResponse({
+        ok: true,
+        count: next.length,
+        reportUnique: Object.keys(mergedReport.entries || {}).length
+      });
       return;
     }
 
@@ -1027,4 +1335,3 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
 
   return true; // Оставляем канал открытым для асинхронного sendResponse.
 });
-

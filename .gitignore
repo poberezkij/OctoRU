@@ -12,3 +12,6 @@ Thumbs.db
 
 # Release artifacts
 dist/*.zip
+
+# Dependencies
+node_modules/

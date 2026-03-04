@@ -182,7 +182,7 @@ let spaHooksAttached = false;
 let queue = new Set();
 let flushTimer = null;
 let untranslated = new Set();
-let untranslatedPending = new Set();
+let untranslatedPendingRows = new Map();
 let untranslatedFlushTimer = null;
 let coverageTranslatedPending = new Set();
 let coverageUntranslatedPending = new Set();
@@ -230,10 +230,11 @@ function scheduleUntranslatedFlush() {
   if (untranslatedFlushTimer) return;
   untranslatedFlushTimer = setTimeout(async () => {
     untranslatedFlushTimer = null;
-    const items = Array.from(untranslatedPending);
-    untranslatedPending.clear();
-    if (!items.length) return;
-    await bgSend({ type: 'ghruReportUntranslated', items });
+    const rows = Array.from(untranslatedPendingRows.values());
+    untranslatedPendingRows.clear();
+    if (!rows.length) return;
+    const items = Array.from(new Set(rows.map((row) => row.key).filter(Boolean)));
+    await bgSend({ type: 'ghruReportUntranslated', items, rows });
   }, 800);
 }
 
@@ -565,6 +566,76 @@ function shouldCollectCandidate(key, el, options = {}) {
   return true;
 }
 
+function getCollectorPageUrl() {
+  const origin = String(location?.origin || "");
+  const pathname = String(location?.pathname || "");
+  if (!origin) return "";
+  return `${origin}${pathname || "/"}`;
+}
+
+function normalizeCollectorSourceLabel(sourceRaw) {
+  const source = String(sourceRaw || "text").trim().toLowerCase();
+  if (!source) return "text";
+  if (source.length > 64) return source.slice(0, 64);
+  return source;
+}
+
+function isSafeSelectorToken(token) {
+  return /^[A-Za-z_][A-Za-z0-9_-]{0,48}$/.test(String(token || ""));
+}
+
+function buildCollectorSelector(el) {
+  if (!el || typeof el.closest !== "function") return "";
+  const target = el.closest(
+    "[data-testid],button,a,input,summary,label,[role],h1,h2,h3,.btn,.Button"
+  ) || el;
+  if (!target || target.nodeType !== Node.ELEMENT_NODE) return "";
+
+  const testId = String(target.getAttribute?.("data-testid") || "").trim();
+  if (testId && /^[A-Za-z0-9_.:-]{1,80}$/.test(testId)) {
+    return `[data-testid="${testId}"]`;
+  }
+
+  const tag = String(target.tagName || "").toLowerCase();
+  let selector = tag || "node";
+
+  const role = String(target.getAttribute?.("role") || "").trim();
+  if (role && /^[A-Za-z0-9_-]{1,40}$/.test(role)) {
+    selector += `[role="${role}"]`;
+  }
+
+  const classList = Array.from(target.classList || [])
+    .filter((cls) => isSafeSelectorToken(cls))
+    .slice(0, 2);
+  if (classList.length) {
+    selector += `.${classList.join(".")}`;
+  }
+
+  if (selector.length > 140) return selector.slice(0, 140);
+  return selector;
+}
+
+function queueUntranslatedRow(key, el, options = {}) {
+  const section = detectCoverageSection();
+  const source = normalizeCollectorSourceLabel(options.source);
+  const url = getCollectorPageUrl();
+  const selector = buildCollectorSelector(el);
+  const signature = [key, section, source, url, selector].join("\u0000");
+  const prev = untranslatedPendingRows.get(signature);
+  if (prev) {
+    prev.count += 1;
+    return;
+  }
+  untranslatedPendingRows.set(signature, {
+    key,
+    count: 1,
+    section,
+    source,
+    url,
+    selector
+  });
+}
+
 function maybeCollectUntranslated(rawBase, el, options = {}) {
   if (!settings.enabled) return;
   if (!settings.collectUntranslated) return;
@@ -573,9 +644,8 @@ function maybeCollectUntranslated(rawBase, el, options = {}) {
   const key = normalizeCollectorKey(raw);
   if (!key) return;
   if (isLikelyTechnicalText(key)) return;
-  if (untranslated.has(key)) return;
   untranslated.add(key);
-  untranslatedPending.add(key);
+  queueUntranslatedRow(key, el, options);
   scheduleUntranslatedFlush();
 }
 
@@ -1238,7 +1308,7 @@ function translateTextNode(textNode) {
     if (!out) {
       if (base && !lookupTranslation(base)) {
         trackCoverageCandidate(base, parent, false);
-        maybeCollectUntranslated(base, parent, { enforceUiScope: false });
+        maybeCollectUntranslated(base, parent, { enforceUiScope: false, source: "text" });
       }
     } else {
       if (base) trackCoverageCandidate(base, parent, true);
@@ -1250,7 +1320,7 @@ function translateTextNode(textNode) {
     const base = extractBaseForLookup(current);
     if (base && !lookupTranslation(base)) {
       trackCoverageCandidate(base, parent, false);
-      maybeCollectUntranslated(base, parent);
+      maybeCollectUntranslated(base, parent, { source: "text" });
     }
     return;
   }
@@ -1297,7 +1367,7 @@ function translateElementAttributes(el) {
       if (!out) {
         if (base && !lookupTranslation(base)) {
           trackCoverageCandidate(base, el, false);
-          maybeCollectUntranslated(base, el, { enforceUiScope: false });
+          maybeCollectUntranslated(base, el, { enforceUiScope: false, source: `attr:${attr}` });
         }
       } else {
         if (base) trackCoverageCandidate(base, el, true);
@@ -1308,7 +1378,7 @@ function translateElementAttributes(el) {
     if (!out) {
       if (base && !lookupTranslation(base)) {
         trackCoverageCandidate(base, el, false);
-        maybeCollectUntranslated(base, el);
+        maybeCollectUntranslated(base, el, { source: `attr:${attr}` });
       }
       continue;
     }
@@ -1458,6 +1528,14 @@ function clearQueuedTranslations() {
   queue.clear();
 }
 
+function clearUntranslatedQueue() {
+  if (untranslatedFlushTimer) {
+    clearTimeout(untranslatedFlushTimer);
+    untranslatedFlushTimer = null;
+  }
+  untranslatedPendingRows.clear();
+}
+
 function clearCoverageQueue() {
   if (coverageFlushTimer) {
     clearTimeout(coverageFlushTimer);
@@ -1520,6 +1598,7 @@ function stopObserver() {
     observer = null;
   }
   clearQueuedTranslations();
+  clearUntranslatedQueue();
   clearCoverageQueue();
   clearCollectorDebugQueue();
   clearContextCaches();

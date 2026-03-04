@@ -406,17 +406,18 @@
     <section class="card admin-only">
       <h2 class="section-title">Непереведенные строки</h2>
       <div class="card-body">
-        <div class="hint">Список помогает быстро дополнять покрытие интерфейса. Хранится в <code>chrome.storage.local</code>.</div>
+        <div class="hint">Показывает частотный отчёт с контекстом (URL, source, selector). Для импорта в словарь используйте “Копировать JSON-шаблон”.</div>
         <div class="btn-row">
           <button class="btn" id="refreshUntranslated">Обновить список</button>
           <button class="btn" id="copyUntranslated">Копировать JSON-шаблон</button>
+          <button class="btn" id="copyUntranslatedReport">Копировать отчёт</button>
           <button class="btn" id="startAutoAudit">Авто-проверка GitHub</button>
           <button class="btn btn-danger" id="stopAutoAudit">Остановить авто-проверку</button>
           <button class="btn" id="pruneUntranslated">Очистить мусор</button>
           <button class="btn btn-danger" id="clearUntranslated">Очистить</button>
         </div>
         <div class="hint" id="autoAuditStatus">Авто-проверка: не запущена</div>
-        <textarea id="untranslated" spellcheck="false" readonly placeholder="Здесь появятся непереведенные строки..."></textarea>
+        <textarea id="untranslated" spellcheck="false" readonly placeholder="Здесь появится частотный отчёт по непереведенным строкам..."></textarea>
       </div>
     </section>
 

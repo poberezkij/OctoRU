@@ -34,6 +34,9 @@ function toTemplateObject(list) {
   return obj;
 }
 
+let lastUntranslatedTemplateText = prettyJson({});
+let lastUntranslatedReportText = "";
+
 function formatCoverageBlock(coverage) {
   const names = {
     repo_home: "repo_home",
@@ -165,9 +168,59 @@ function bgSend(msg) {
 }
 
 async function loadUntranslatedInto(textarea) {
-  const res = await bgSend({ type: "ghruGetUntranslated" });
-  const list = Array.isArray(res?.list) ? res.list : [];
-  textarea.value = prettyJson(toTemplateObject(list));
+  const res = await bgSend({ type: "ghruGetUntranslatedReport", limit: 600 });
+  if (!res?.ok) throw new Error("Не удалось получить отчёт по непереведённым строкам");
+  const report = res.report || {};
+  const entries = Array.isArray(report.entries) ? report.entries : [];
+  const keys = entries.map((row) => row?.key).filter((v) => typeof v === "string" && v.trim());
+  lastUntranslatedTemplateText = prettyJson(toTemplateObject(keys));
+  lastUntranslatedReportText = formatUntranslatedReportBlock(report);
+  textarea.value = lastUntranslatedReportText;
+}
+
+function topCounterEntries(counter, limit = 2) {
+  const rows = Object.entries(counter && typeof counter === "object" ? counter : {});
+  rows.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  return rows.slice(0, limit);
+}
+
+function formatCounterInline(counter, fallback = "-") {
+  const rows = topCounterEntries(counter, 2);
+  if (!rows.length) return fallback;
+  return rows.map(([k, n]) => `${k}(${n})`).join(", ");
+}
+
+function formatUntranslatedReportBlock(report) {
+  const r = report || {};
+  const entries = Array.isArray(r.entries) ? r.entries : [];
+  const lines = [];
+  lines.push(`TOTAL UNIQUE: ${r.totalUnique ?? entries.length}`);
+  lines.push(`SHOWING: ${entries.length}`);
+  if (r.updatedAt) lines.push(`UPDATED: ${r.updatedAt}`);
+  lines.push("");
+
+  if (!entries.length) {
+    lines.push("(empty)");
+    return lines.join("\n");
+  }
+
+  let i = 1;
+  for (const row of entries) {
+    const key = String(row?.key || "").trim();
+    if (!key) continue;
+    lines.push(`${i}. [${row?.count ?? 0}] ${key}`);
+    lines.push(`   section: ${formatCounterInline(row?.sections)}`);
+    lines.push(`   source: ${formatCounterInline(row?.sources)}`);
+    const topUrl = topCounterEntries(row?.urls, 1)[0];
+    if (topUrl) lines.push(`   url: ${topUrl[0]} (${topUrl[1]})`);
+    const topSelector = topCounterEntries(row?.selectors, 1)[0];
+    if (topSelector) lines.push(`   selector: ${topSelector[0]} (${topSelector[1]})`);
+    if (row?.lastSeenAt) lines.push(`   last_seen: ${row.lastSeenAt}`);
+    lines.push("");
+    i += 1;
+  }
+
+  return lines.join("\n").trimEnd();
 }
 
 async function getCoverageData() {
@@ -277,7 +330,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   applyAdminModeUi();
 
-  await loadUntranslatedInto(untranslated);
+  try {
+    await loadUntranslatedInto(untranslated);
+  } catch {
+    lastUntranslatedTemplateText = prettyJson({});
+    lastUntranslatedReportText = "Не удалось загрузить отчёт";
+    untranslated.value = lastUntranslatedReportText;
+  }
   await loadCoverageInto(coverageDashboard);
   await loadCollectorDebugInto(collectorDebugDashboard);
   await refreshAutoAuditState();
@@ -337,13 +396,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   $("refreshUntranslated")?.addEventListener("click", async () => {
-    await loadUntranslatedInto(untranslated);
-    setStatus("Готово", true);
+    try {
+      await loadUntranslatedInto(untranslated);
+      setStatus("Готово", true);
+    } catch (e) {
+      setStatus(e?.message || "Ошибка", false);
+    }
   });
 
   $("copyUntranslated")?.addEventListener("click", async () => {
     try {
-      await copyToClipboard(untranslated.value || prettyJson({}));
+      await copyToClipboard(lastUntranslatedTemplateText || prettyJson({}));
+    } catch (e) {
+      setStatus(e?.message || "Не удалось скопировать", false);
+    }
+  });
+
+  $("copyUntranslatedReport")?.addEventListener("click", async () => {
+    try {
+      await copyToClipboard(lastUntranslatedReportText || untranslated.value || "");
     } catch (e) {
       setStatus(e?.message || "Не удалось скопировать", false);
     }
@@ -372,14 +443,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   $("pruneUntranslated")?.addEventListener("click", async () => {
     const res = await bgSend({ type: "ghruPruneUntranslated" });
-    await loadUntranslatedInto(untranslated);
+    try {
+      await loadUntranslatedInto(untranslated);
+    } catch {
+      untranslated.value = "Не удалось загрузить отчёт";
+    }
     if (res?.ok) setStatus("Готово", true);
     else setStatus("Ошибка", false);
   });
 
   $("clearUntranslated")?.addEventListener("click", async () => {
     await bgSend({ type: "ghruClearUntranslated" });
-    untranslated.value = prettyJson({});
+    lastUntranslatedTemplateText = prettyJson({});
+    lastUntranslatedReportText = "(empty)";
+    untranslated.value = "(empty)";
     setStatus("Готово", true);
   });
 
