@@ -92,4 +92,8 @@
 - Лицензия: `LICENSE`
 - Безопасность: `SECURITY.md`
 - Правила контрибьюта: `CONTRIBUTING.md`
-- Заметки релиза: `RELEASE_NOTES_v2.1.0.md`
+- Заметки релиза:
+  - `RELEASE_NOTES_v2.1.3.md`
+  - `RELEASE_NOTES_v2.1.2.md`
+  - `RELEASE_NOTES_v2.1.1.md`
+  - `RELEASE_NOTES_v2.1.0.md`

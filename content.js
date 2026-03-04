@@ -1069,7 +1069,8 @@ function buildTranslationMaps() {
     const key = norm(k);
     if (!key || typeof v !== "string" || isBrokenTranslationValue(v)) continue;
     translations.set(key, v);
-    translationsCI.set(key.toLowerCase(), v);
+    const lowered = key.toLowerCase();
+    if (!translationsCI.has(lowered)) translationsCI.set(lowered, v);
   }
 
   // Затем применяем пользовательский словарь, если значение не битое.

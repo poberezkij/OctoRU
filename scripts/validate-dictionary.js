@@ -117,6 +117,16 @@ const numericKeys = [];
 const gmtKeys = [];
 const lowercaseMap = new Map();
 const lowercaseConflicts = [];
+const ALLOWED_LOWERCASE_CONFLICT_KEYS = {
+  forks: new Set(["Forks", "forks"]),
+  watching: new Set(["Watching", "watching"])
+};
+
+function isAllowlistedLowercaseConflict(conflict) {
+  const allowedKeys = ALLOWED_LOWERCASE_CONFLICT_KEYS[conflict.lowered];
+  if (!allowedKeys) return false;
+  return allowedKeys.has(conflict.first.key) && allowedKeys.has(conflict.second.key);
+}
 
 for (const [k, v] of entries) {
   if (isCommentKey(k)) {
@@ -210,15 +220,28 @@ if (emptyPairs.length) {
 }
 
 if (lowercaseConflicts.length) {
-  errorCount += lowercaseConflicts.length;
+  let blockingLowercaseConflicts = 0;
   for (const c of lowercaseConflicts.slice(0, 20)) {
     warn(
       `Lowercase conflict "${c.lowered}": ` +
       `"${c.first.key}" => "${c.first.value}" vs "${c.second.key}" => "${c.second.value}"`
     );
+    if (isAllowlistedLowercaseConflict(c)) {
+      warn(`Allowlisted lowercase conflict: "${c.lowered}"`);
+    } else {
+      blockingLowercaseConflicts++;
+    }
   }
   if (lowercaseConflicts.length > 20) {
     warn(`...and ${lowercaseConflicts.length - 20} more lowercase conflicts`);
+  }
+  if (lowercaseConflicts.length > 20) {
+    for (const c of lowercaseConflicts.slice(20)) {
+      if (!isAllowlistedLowercaseConflict(c)) blockingLowercaseConflicts++;
+    }
+  }
+  if (blockingLowercaseConflicts) {
+    errorCount += blockingLowercaseConflicts;
   }
 }
 

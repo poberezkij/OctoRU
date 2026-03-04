@@ -54,7 +54,15 @@ const line = `- ${builtAt} version=${version} keys=${keys} hash=${hash} source=$
 if (!fs.existsSync(changelogPath)) {
   fs.writeFileSync(changelogPath, `# Dictionary Changelog\n\n${line}`, "utf8");
 } else {
-  fs.appendFileSync(changelogPath, line, "utf8");
+  const existing = fs.readFileSync(changelogPath, "utf8");
+  const lastNonEmpty = existing
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .pop() || "";
+  if (!lastNonEmpty.includes(`version=${version}`)) {
+    fs.appendFileSync(changelogPath, line, "utf8");
+  }
 }
 
 console.log(`DICT VERSION: ${version}`);
