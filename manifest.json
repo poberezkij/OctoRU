@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "OctoRU — GitHub на русском",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "Русификация UI GitHub без перевода кода, диффов, README и комментариев. MV3, локальный словарь, динамические правила и сбор непереведённых UI-строк.",
   "icons": {
     "48": "icon48.png",

@@ -44,28 +44,50 @@ const dict = readJsonObject(dictPath, dictPathArg);
 const normalized = JSON.stringify(dict, Object.keys(dict).sort());
 const hash = crypto.createHash("sha1").update(normalized).digest("hex").slice(0, 12);
 const keys = Object.keys(dict).length;
-const builtAt = new Date().toISOString();
-const version = `${builtAt.slice(0, 10)}-${keys}-${hash}`;
+const force = process.argv.includes("--force") || process.env.GHRU_DICT_VERSION_FORCE === "1";
 
-const meta = { version, keys, hash, builtAt };
-fs.writeFileSync(outPath, `${JSON.stringify(meta, null, 2)}\n`, "utf8");
-
-const line = `- ${builtAt} version=${version} keys=${keys} hash=${hash} source=${dictPathArg}\n`;
-if (!fs.existsSync(changelogPath)) {
-  fs.writeFileSync(changelogPath, `# Dictionary Changelog\n\n${line}`, "utf8");
-} else {
-  const existing = fs.readFileSync(changelogPath, "utf8");
-  const lastNonEmpty = existing
-    .split(/\r?\n/)
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .pop() || "";
-  if (!lastNonEmpty.includes(`version=${version}`)) {
-    fs.appendFileSync(changelogPath, line, "utf8");
+function readExistingMeta() {
+  if (!fs.existsSync(outPath)) return null;
+  try {
+    const raw = fs.readFileSync(outPath, "utf8");
+    const parsed = JSON.parse(raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    return parsed;
+  } catch (e) {
+    return null;
   }
 }
 
-console.log(`DICT VERSION: ${version}`);
+function hasValidCurrentMeta(meta) {
+  return !!meta &&
+    meta.keys === keys &&
+    meta.hash === hash &&
+    typeof meta.version === "string" &&
+    typeof meta.builtAt === "string";
+}
+
+const existingMeta = readExistingMeta();
+let meta = existingMeta;
+let changed = force || !hasValidCurrentMeta(existingMeta);
+
+if (changed) {
+  const builtAt = new Date().toISOString();
+  const version = `${builtAt.slice(0, 10)}-${keys}-${hash}`;
+  meta = { version, keys, hash, builtAt };
+  fs.writeFileSync(outPath, `${JSON.stringify(meta, null, 2)}\n`, "utf8");
+
+  const line = `- ${builtAt} version=${version} keys=${keys} hash=${hash} source=${dictPathArg}\n`;
+  if (!fs.existsSync(changelogPath)) {
+    fs.writeFileSync(changelogPath, `# Dictionary Changelog\n\n${line}`, "utf8");
+  } else {
+    const existing = fs.readFileSync(changelogPath, "utf8");
+    if (!existing.includes(`version=${version}`)) {
+      fs.appendFileSync(changelogPath, line, "utf8");
+    }
+  }
+}
+
+console.log(`DICT VERSION: ${meta.version}`);
 console.log(`META FILE: ${outPathArg}`);
 console.log(`CHANGELOG: ${changelogPathArg}`);
-console.log("OK: dict version updated");
+console.log(changed ? "OK: dict version updated" : "OK: dict version unchanged");

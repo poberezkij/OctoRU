@@ -23,30 +23,16 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
       - name: Run release checks
-        run: npm run release:check
+        run: xvfb-run --auto-servernum npm run release:check
 
       - name: Prepare release artifact
-        run: |
-          mkdir -p dist
-          zip -r "dist/OctoRU-${GITHUB_REF_NAME}.zip" \
-            manifest.json \
-            background.js \
-            content.js \
-            content-dynamic-rules.js \
-            default-translations.js \
-            options.html \
-            options.js \
-            popup.html \
-            popup.js \
-            bundled-dictionary.json \
-            icon48.png \
-            icon128.png
+        run: npm run release:zip
 
       - name: Resolve release notes
         id: notes

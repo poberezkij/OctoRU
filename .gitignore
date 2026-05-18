@@ -9,6 +9,7 @@ translation-audit-report.json
 .DS_Store
 Thumbs.db
 .vscode/
+.playwright-mcp/
 
 # Release artifacts
 dist/*.zip

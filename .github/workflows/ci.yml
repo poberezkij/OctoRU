@@ -23,10 +23,10 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
       - name: Run release checks
-        run: npm run release:check
+        run: xvfb-run --auto-servernum npm run release:check

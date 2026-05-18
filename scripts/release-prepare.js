@@ -120,15 +120,27 @@ function main() {
   const runChecks = !process.argv.includes("--no-check");
 
   const packageJsonPath = path.resolve(rootDir, "package.json");
+  const packageLockPath = path.resolve(rootDir, "package-lock.json");
   const manifestPath = path.resolve(rootDir, "manifest.json");
   const pkg = readJsonObject(packageJsonPath, "package.json");
   const manifest = readJsonObject(manifestPath, "manifest.json");
+  const lock = fs.existsSync(packageLockPath)
+    ? readJsonObject(packageLockPath, "package-lock.json")
+    : null;
 
   const packageVersion = String(pkg.version || "").trim();
   const manifestVersion = String(manifest.version || "").trim();
+  const lockVersion = String(lock?.version || "").trim();
+  const lockRootVersion = String(lock?.packages?.[""]?.version || "").trim();
   if (!packageVersion || !manifestVersion) fail("Version is missing in package.json or manifest.json");
   if (packageVersion !== manifestVersion) {
     fail(`Version mismatch before prepare: package.json=${packageVersion} manifest.json=${manifestVersion}`);
+  }
+  if (lock && (packageVersion !== lockVersion || packageVersion !== lockRootVersion)) {
+    fail(
+      `Version mismatch before prepare: package.json=${packageVersion} ` +
+      `package-lock.json=${lockVersion || "missing"} package-lock root=${lockRootVersion || "missing"}`
+    );
   }
 
   const nextVersion = resolveTargetVersion(packageVersion, versionArg);
@@ -137,8 +149,15 @@ function main() {
   } else {
     pkg.version = nextVersion;
     manifest.version = nextVersion;
+    if (lock) {
+      lock.version = nextVersion;
+      if (lock.packages && lock.packages[""]) {
+        lock.packages[""].version = nextVersion;
+      }
+    }
     writeJsonObject(packageJsonPath, pkg);
     writeJsonObject(manifestPath, manifest);
+    if (lock) writeJsonObject(packageLockPath, lock);
     info(`Version bumped: ${packageVersion} -> ${nextVersion}`);
   }
 

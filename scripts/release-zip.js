@@ -16,6 +16,7 @@ const FILES = [
   "popup.html",
   "popup.js",
   "bundled-dictionary.json",
+  "dict-version.json",
   "icon48.png",
   "icon128.png"
 ];
