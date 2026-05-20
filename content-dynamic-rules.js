@@ -98,6 +98,35 @@
       if (monthRu) return "Нет вкладов " + m[2] + " " + monthRu;
     }
 
+    m = t.match(/^(\d[\d.,]*[kKmM]?)\s+contributions?\s+on\s+([A-Za-z]{3,9})\s+(\d{1,2})(?:st|nd|rd|th)?$/i);
+    if (m) {
+      const monthRu = monthToRuGenitive(m[2]);
+      if (monthRu) {
+        const parsed = parseCount(m[1]);
+        const word = Number.isFinite(parsed.n)
+          ? ruPlural(parsed.n, "вклад", "вклада", "вкладов")
+          : "вкладов";
+        return m[1] + " " + word + " " + m[3] + " " + monthRu;
+      }
+    }
+
+    m = t.match(/^Yowza,\s+that's a big file\.\s+Try again with a file smaller than\s+(\d+)\s*MB$/i);
+    if (m) return "Ого, это большой файл. Попробуйте ещё раз с файлом меньше " + m[1] + " МБ";
+
+    m = t.match(/^(\d+)\s*GB of Codespaces storage per developer$/i);
+    if (m) return m[1] + " ГБ хранилища Codespaces на разработчика";
+
+    m = t.match(/^(\d+)\s*MB of Packages storage$/i);
+    if (m) return m[1] + " МБ хранилища Packages";
+
+    m = t.match(/^Images should be at least\s+(\d[\d.,]*)\s*[×x]\s*(\d[\d.,]*)px\s+\((\d[\d.,]*)\s*[×x]\s*(\d[\d.,]*)px for best display\)$/i);
+    if (m) {
+      return "Изображения должны быть не меньше " + m[1] + "×" + m[2] + "px (для лучшего отображения — " + m[3] + "×" + m[4] + "px)";
+    }
+
+    m = t.match(/^Please upload a picture smaller than\s+(\d[\d.,]*)\s*[×x]\s*(\d[\d.,]*)$/i);
+    if (m) return "Пожалуйста, загрузите изображение меньше " + m[1] + "×" + m[2];
+
     m = t.match(/^Link to social profile\s+(\d+)$/i);
     if (m) return "Ссылка на соцпрофиль " + m[1];
 

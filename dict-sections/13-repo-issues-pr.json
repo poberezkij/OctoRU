@@ -312,7 +312,6 @@
   "I want to delete this repository": "Я хочу удалить этот репозиторий",
   "Identify vulnerabilities and errors with": "Выявлять уязвимости и ошибки с помощью",
   "If disabled, the Models tab will be hidden, and the prompt editor and comparison tooling evaluations will be unavailable": "Если отключить, вкладка Models будет скрыта, а редактор промптов и инструменты сравнения/оценки будут недоступны",
-  "Images should be at least {N}×320px ({N}×640px for best display)": "Изображения должны быть не меньше {N}×320px (для лучшего отображения — {N}×640px)",
   "Include Git LFS objects in archives": "Включать объекты Git LFS в архивы",
   "Include this code in the": "Включить этот код в",
   "Installed GitHub Apps": "Установленные GitHub Apps",
@@ -399,7 +398,6 @@
   "Performs analysis on locally built container image and posts the results in SARIF report": "Выполняет анализ локально собранного образа контейнера и публикует результаты в отчёте SARIF",
   "Please type": "Пожалуйста, введите",
   "Please upload a picture smaller than {N} MB": "Пожалуйста, загрузите изображение меньше {N} МБ",
-  "Please upload a picture smaller than {N},000x10,{N}": "Пожалуйста, загрузите изображение меньше {N},000x10,{N}",
   "Policy": "Политика",
   "Presented when merging a pull request with merge": "Показывается при слиянии пул-реквеста методом merge",
   "Presented when merging a pull request with squash": "Показывается при слиянии пул-реквеста методом squash",
@@ -846,8 +844,6 @@
   "{YEAR} was the year agents went from buzzword to battle-tested, this talk shows how top teams are using them to ship faster, cut technical debt, and what's coming in {YEAR}": "{YEAR} стал годом, когда агенты перестали быть модным словом и стали проверенным инструментом. Этот доклад показывает, как лучшие команды используют их, чтобы поставлять быстрее, снижать техдолг и что будет дальше в {YEAR}",
   "#{N} updated": "Обновлено: {N}",
   "(if enabled), visit the": "(если включено), перейдите в",
-  "15GB of Codespaces storage per developer": "15 ГБ хранилища Codespaces на разработчика",
-  "500MB of Packages storage": "500 МБ хранилища Packages",
   "A default package manager used for the Java programming language and the Java runtime environment": "Пакетный менеджер по умолчанию для языка Java и среды выполнения Java",
   "A free and open source package manager used for the Microsoft development platforms including .NET": "Бесплатный пакетный менеджер с открытым исходным кодом для платформ разработки Microsoft, включая .NET",
   "A package manager for JavaScript, included with Node.js. npm makes it easy for developers to share and reuse code": "Пакетный менеджер для JavaScript, входящий в Node.js. npm упрощает обмен кодом и его повторное использование",
@@ -1075,7 +1071,6 @@
   "{N} GB used / {N},{N} GB included": "Использовано {N} ГБ / включено {N},{N} ГБ",
   "{N} collaborators": "{N} соавторов",
   "{N} contribution in the last year": "{N} вкладов за последний год",
-  "{N} contribution on February 13th": "{N} вкладов 13 февраля",
   "{N} core-hours of Codespaces compute per developer": "{N} core-hours вычислений Codespaces на разработчика",
   "{N} forks": "{N} форков",
   "{N} min used / {N} {N} min included": "Использовано {N} мин / включено {N} {N} мин",
@@ -1102,5 +1097,7 @@
   "Readme": "Прочти меня",
   "Commits": "коммитов",
   "Tag": "Тег",
-  "Tags": "Теги"
+  "Tags": "Теги",
+  "Label": "Метка",
+  "Milestone": "Веха"
 }

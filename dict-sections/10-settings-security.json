@@ -21,5 +21,8 @@
   "Grouped security updates": "Групповые обновления безопасности",
   "Learn more about Dependabot": "Подробнее о Dependabot",
   "Private vulnerability reporting": "Приватные сообщения об уязвимостях",
-  "Security log": "Журнал безопасности"
+  "Security log": "Журнал безопасности",
+  "Password and authentication": "Пароль и аутентификация",
+  "Sessions": "Сеансы",
+  "SSH and GPG keys": "SSH- и GPG-ключи"
 }
