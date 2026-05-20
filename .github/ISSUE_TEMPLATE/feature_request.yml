@@ -1,0 +1,42 @@
+name: Предложение улучшения
+description: Предложить новую возможность или улучшение UX/словаря
+title: "[feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую проблему решаем?
+      description: Опишите сценарий пользователя, а не только желаемое решение.
+      placeholder: Часто встречающиеся строки на странице Pull requests пока приходится добавлять вручную.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предлагаемое решение
+      description: Как вы видите улучшение?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативы
+      description: Какие другие варианты вы рассматривали?
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Область проекта
+      options:
+        - Переводы UI
+        - UI-only фильтры
+        - Popup/options
+        - Аудит и coverage
+        - Релизный процесс
+        - Документация
+        - Другое
+    validations:
+      required: true

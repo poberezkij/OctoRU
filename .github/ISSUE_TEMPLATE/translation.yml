@@ -1,0 +1,59 @@
+name: Непереведённая или неверно переведённая строка
+description: Сообщить о проблеме с переводом интерфейса GitHub
+title: "[translation]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо, что помогаете улучшать OctoRU. Пожалуйста, указывайте только UI-строки GitHub: код, README, комментарии пользователей и названия репозиториев переводиться не должны.
+  - type: input
+    id: page
+    attributes:
+      label: Страница GitHub
+      description: URL или тип страницы, где видна проблема.
+      placeholder: https://github.com/settings/profile
+    validations:
+      required: true
+  - type: textarea
+    id: source-text
+    attributes:
+      label: Английский текст
+      description: Точная строка из интерфейса GitHub.
+      placeholder: "New issue"
+    validations:
+      required: true
+  - type: textarea
+    id: current-translation
+    attributes:
+      label: Текущий перевод
+      description: Заполните, если строка перевелась неверно. Если строка не перевелась, напишите "не переведено".
+      placeholder: "не переведено"
+    validations:
+      required: true
+  - type: textarea
+    id: expected-translation
+    attributes:
+      label: Ожидаемый перевод
+      description: Как, на ваш взгляд, должна звучать строка.
+      placeholder: "Новая задача"
+    validations:
+      required: false
+  - type: dropdown
+    id: content-type
+    attributes:
+      label: Это точно UI, а не пользовательский контент?
+      options:
+        - Да, это элемент интерфейса GitHub
+        - Не уверен
+        - Нет, это README/комментарий/код/название репозитория
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Скриншот или контекст
+      description: Можно приложить скриншот или описать, где именно находится строка.
+    validations:
+      required: false
