@@ -6,6 +6,7 @@ const path = require("path");
 
 const dictPathArg = process.argv[2] || "bundled-dictionary.json";
 const dictPath = path.resolve(process.cwd(), dictPathArg);
+let warningCount = 0;
 
 function fail(msg) {
   console.error(`ERROR: ${msg}`);
@@ -13,6 +14,7 @@ function fail(msg) {
 }
 
 function warn(msg) {
+  warningCount++;
   console.warn(`WARN: ${msg}`);
 }
 
@@ -122,6 +124,7 @@ const yearBoundKeys = [];
 const monthDayKeys = [];
 const numericKeys = [];
 const gmtKeys = [];
+const veryLongKeys = [];
 const lowercaseMap = new Map();
 const lowercaseConflicts = [];
 const ALLOWED_LOWERCASE_CONFLICT_KEYS = {
@@ -201,9 +204,7 @@ for (const [k, v] of entries) {
   if (looksLikeHash(kk)) {
     warnings.push(`Suspicious SHA-like key: "${kk}"`);
   }
-  if (kk.length > 120) {
-    warnings.push(`Very long key (${kk.length}): "${kk.slice(0, 80)}..."`);
-  }
+  if (kk.length > 120) veryLongKeys.push(kk);
 }
 
 if (nonStringPairs.length) {
@@ -292,6 +293,13 @@ if (gmtKeys.length) {
   warn("Do not localize GMT-offset labels via dictionary.");
 }
 
+if (veryLongKeys.length) {
+  warn(
+    `Very long keys: ${veryLongKeys.length}. ` +
+    "Run `node scripts/dict-quality-lint.js bundled-dictionary.json` for samples."
+  );
+}
+
 const uniqueWarnings = Array.from(new Set(warnings));
 for (const w of uniqueWarnings.slice(0, 30)) {
   warn(w);
@@ -304,7 +312,7 @@ info(`Checked file: ${dictPathArg}`);
 info(`Total entries (including comments): ${entries.length}`);
 info(`Real dictionary entries: ${realEntriesCount}`);
 info(`Lowercase-unique keys: ${lowercaseMap.size}`);
-info(`Warnings: ${uniqueWarnings.length}`);
+info(`Warnings: ${warningCount}`);
 
 if (errorCount > 0) {
   fail(`Dictionary check failed. Errors: ${errorCount}`);

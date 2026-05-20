@@ -57,7 +57,7 @@
 Ключевые команды:
 - `npm run dict:build` — сборка словаря из `dict-sections`
 - `npm run dict:check` — сборка + валидация + strict lint
-- `npm run dict:lint:quality` — quality-проверка словаря
+- `npm run dict:lint:quality` — quality-проверка словаря с ratchet-baseline для suspicious-ключей
 - `npm run dev:check` — полный локальный check словаря и рантайма
 - `npm run release:check` — release-check c e2e smoke
 - `npm run release:prepare -- <версия>` — bump версии + checks + zip одной командой
@@ -69,6 +69,7 @@
 - `options.*`, `popup.*` — UI расширения
 - `dict-sections/*.json` — исходники словаря
 - `bundled-dictionary.json` — собранный словарь
+- `dictionary-quality-baseline.json` — лимиты качества словаря, которые нужно постепенно снижать
 
 ## 💖 Поддержка проекта
 Если расширение экономит вам время, можно поддержать развитие:
