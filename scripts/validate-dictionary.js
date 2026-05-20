@@ -71,6 +71,13 @@ function containsAnyDigit(s) {
   return /\d/.test(s);
 }
 
+function containsDisallowedDigit(s) {
+  const withoutAllowedTokens = String(s || "")
+    .replace(/\{N\}/g, "")
+    .replace(/\b(?:3M|ARM64|SLSA3|EC2)\b/gi, "");
+  return containsAnyDigit(withoutAllowedTokens);
+}
+
 function containsGMTOffset(s) {
   return /\(\s*GMT\s*[+-]\d{2}:\d{2}\s*\)/i.test(s);
 }
@@ -170,7 +177,7 @@ for (const [k, v] of entries) {
   if (containsYearToken(kk)) {
     yearBoundKeys.push(kk);
   }
-  if (containsAnyDigit(kk)) {
+  if (containsDisallowedDigit(kk)) {
     numericKeys.push(kk);
   }
   if (containsGMTOffset(kk)) {

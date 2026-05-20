@@ -3,14 +3,17 @@
 
 const fs = require("fs");
 const path = require("path");
+const vm = require("vm");
 
 const dictPathArg = process.argv[2] || "bundled-dictionary.json";
 const baselinePathArg = process.argv[3] || "coverage-baseline.json";
 const thresholdArg = process.argv[4] || "90";
 const minCorpusArg = process.argv[5] || "200";
+const defaultTranslationsPathArg = process.argv[6] || "default-translations.js";
 
 const dictPath = path.resolve(process.cwd(), dictPathArg);
 const baselinePath = path.resolve(process.cwd(), baselinePathArg);
+const defaultTranslationsPath = path.resolve(process.cwd(), defaultTranslationsPathArg);
 const threshold = Number(thresholdArg);
 const minCorpus = Number(minCorpusArg);
 
@@ -48,16 +51,46 @@ function norm(s) {
   return String(s || "").replace(/\s+/g, " ").trim();
 }
 
+function buildLookupCandidates(section, key) {
+  const normalized = norm(key);
+  const base = norm(normalized.replace(/[.:\u2026!?]+$/, ""));
+  const keys = base && base !== normalized ? [normalized, base] : [normalized];
+  const candidates = [];
+  for (const item of keys) {
+    candidates.push(`[${section}] ${item}`, `${section}:${item}`, item);
+  }
+  return candidates;
+}
+
+function readDefaultTranslations(filePath) {
+  if (!fs.existsSync(filePath)) return {};
+  const source = fs.readFileSync(filePath, "utf8");
+  const context = { window: {} };
+  try {
+    vm.runInNewContext(source, context, { filename: filePath });
+  } catch (e) {
+    fail(`Не удалось загрузить ${defaultTranslationsPathArg}: ${e.message || String(e)}`);
+  }
+  const dict = context.window.GHRU_DEFAULT_TRANSLATIONS;
+  if (!dict || typeof dict !== "object" || Array.isArray(dict)) {
+    fail(`${defaultTranslationsPathArg} должен задавать window.GHRU_DEFAULT_TRANSLATIONS`);
+  }
+  return dict;
+}
+
 const dict = readJsonObject(dictPath, dictPathArg);
+const defaultTranslations = readDefaultTranslations(defaultTranslationsPath);
 const baseline = readJsonObject(baselinePath, baselinePathArg);
 
 const dictMap = new Map();
-for (const [k, v] of Object.entries(dict)) {
-  if (typeof k !== "string" || typeof v !== "string") continue;
-  const key = norm(k);
-  const val = norm(v);
-  if (!key || !val) continue;
-  dictMap.set(key, val);
+for (const source of [defaultTranslations, dict]) {
+  for (const [k, v] of Object.entries(source)) {
+    if (typeof k !== "string" || typeof v !== "string") continue;
+    const key = norm(k);
+    const val = norm(v);
+    if (!key || !val) continue;
+    dictMap.set(key, val);
+  }
 }
 
 const stats = {};
@@ -79,7 +112,7 @@ for (const section of sections) {
     secTotal += 1;
     total += 1;
 
-    const candidates = [`[${section}] ${key}`, `${section}:${key}`, key];
+    const candidates = buildLookupCandidates(section, key);
     let found = false;
     for (const c of candidates) {
       if (dictMap.has(c)) {
@@ -104,6 +137,7 @@ for (const section of sections) {
 const totalPercent = total ? Math.round((translatedCount / total) * 100) : 0;
 
 console.log(`COVERAGE_GATE: ${totalPercent}% (${translatedCount}/${total}) threshold=${threshold}%`);
+console.log(`Dictionary sources: ${defaultTranslationsPathArg}, ${dictPathArg}`);
 for (const section of sections) {
   const row = stats[section];
   console.log(`${section}: ${row.percent}% (${row.translatedCount}/${row.total})`);

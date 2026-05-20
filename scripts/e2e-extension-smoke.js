@@ -8,27 +8,32 @@ const vm = require("vm");
 
 const rootDir = path.resolve(__dirname, "..");
 const extensionPath = rootDir;
-const testUrl = "https://github.com/poberezkij/OctoRU";
+const baseUrl = "https://github.com";
 
 function fail(msg) {
   console.error(`ERROR: ${msg}`);
   process.exit(1);
 }
 
-function loadDefaultTranslations() {
+function loadTranslations() {
   const scriptPath = path.resolve(rootDir, "default-translations.js");
   const source = fs.readFileSync(scriptPath, "utf8");
   const context = { window: {} };
   vm.runInNewContext(source, context, { filename: scriptPath });
-  return context.window.GHRU_DEFAULT_TRANSLATIONS || {};
+  const bundledPath = path.resolve(rootDir, "bundled-dictionary.json");
+  const bundled = JSON.parse(fs.readFileSync(bundledPath, "utf8"));
+  return {
+    ...(context.window.GHRU_DEFAULT_TRANSLATIONS || {}),
+    ...bundled
+  };
 }
 
-function fixtureHtml() {
+function repoFixtureHtml() {
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>OctoRU extension smoke</title>
+  <title>OctoRU repo smoke</title>
 </head>
 <body>
   <header>
@@ -64,6 +69,154 @@ function fixtureHtml() {
 </html>`;
 }
 
+function issuesFixtureHtml() {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>OctoRU issues smoke</title>
+</head>
+<body>
+  <header>
+    <nav aria-label="Global">
+      <a id="pull-requests" href="/pulls">Pull requests</a>
+      <a id="issues" href="/issues">Issues</a>
+      <a id="notifications" href="/notifications">Notifications</a>
+    </nav>
+  </header>
+  <main>
+    <h1 id="issues-heading">Issues</h1>
+    <div class="table-list-header">
+      <button id="open-filter">Open</button>
+      <button id="closed-filter">Closed</button>
+      <button id="label-filter">Label</button>
+      <button id="milestone-filter">Milestone</button>
+      <button id="new-issue">New issue</button>
+    </div>
+    <p id="empty-hint" role="status">Try adjusting your search filters.</p>
+    <p id="contribution-date" role="status">1 contribution on February 13th</p>
+    <p id="big-file-warning" role="alert">Yowza, that's a big file. Try again with a file smaller than 25MB</p>
+    <p id="image-size-warning" role="alert">Images should be at least 320×320px (640×640px for best display)</p>
+    <p id="picture-size-warning" role="alert">Please upload a picture smaller than 10,000x10,000</p>
+    <a id="issue-title" class="js-issue-title" href="/poberezkij/OctoRU/issues/1">Sign in Save Issues</a>
+  </main>
+</body>
+</html>`;
+}
+
+function settingsFixtureHtml() {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>OctoRU settings smoke</title>
+</head>
+<body>
+  <header>
+    <nav aria-label="Global">
+      <a id="profile-link" href="/settings/profile">Profile</a>
+      <a id="sign-out" href="/logout">Sign out</a>
+    </nav>
+  </header>
+  <main class="settings-main">
+    <nav class="menu" aria-label="Settings">
+      <a id="settings-menu" href="/settings/profile">Settings</a>
+      <a id="security-menu" href="/settings/security">Security</a>
+      <a id="appearance-menu" href="/settings/appearance">Appearance</a>
+    </nav>
+    <section class="settings-content">
+      <h1 id="settings-heading">Settings</h1>
+      <label for="profile-name">Name</label>
+      <input id="profile-name" type="text" placeholder="Name" aria-label="Name">
+      <button id="save-settings" title="Save">Save</button>
+      <textarea id="bio" placeholder="Save">Sign in Save Issues</textarea>
+    </section>
+  </main>
+</body>
+</html>`;
+}
+
+function fixtureForPath(pathname) {
+  if (pathname === "/poberezkij/OctoRU/issues") return issuesFixtureHtml();
+  if (pathname === "/settings/profile") return settingsFixtureHtml();
+  return repoFixtureHtml();
+}
+
+function requireTranslation(translations, key) {
+  const value = translations[key];
+  if (typeof value !== "string" || !value.trim()) {
+    fail(`Missing translation for ${JSON.stringify(key)}`);
+  }
+  return value;
+}
+
+function normalizeText(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+async function collectPageState(page) {
+  return page.evaluate(() => {
+    const text = (selector) => document.querySelector(selector)?.textContent?.replace(/\s+/g, " ").trim();
+    const attr = (selector, name) => document.querySelector(selector)?.getAttribute(name);
+    return {
+      signIn: text("#sign-in"),
+      pullRequests: text("#pull-requests"),
+      issues: text("#issues"),
+      notifications: text("#notifications"),
+      saveText: text("#save"),
+      saveTitle: attr("#save", "title"),
+      searchPlaceholder: attr("#search", "placeholder"),
+      searchAria: attr("#search", "aria-label"),
+      codeTab: text("#code-tab"),
+      actionsTab: text("#actions-tab"),
+      readme: text("#readme"),
+      comment: text("#comment"),
+      codeBlock: text("#code-block"),
+      issuesHeading: text("#issues-heading"),
+      openFilter: text("#open-filter"),
+      closedFilter: text("#closed-filter"),
+      labelFilter: text("#label-filter"),
+      milestoneFilter: text("#milestone-filter"),
+      newIssue: text("#new-issue"),
+      emptyHint: text("#empty-hint"),
+      contributionDate: text("#contribution-date"),
+      bigFileWarning: text("#big-file-warning"),
+      imageSizeWarning: text("#image-size-warning"),
+      pictureSizeWarning: text("#picture-size-warning"),
+      issueTitle: text("#issue-title"),
+      profileLink: text("#profile-link"),
+      signOut: text("#sign-out"),
+      settingsMenu: text("#settings-menu"),
+      securityMenu: text("#security-menu"),
+      appearanceMenu: text("#appearance-menu"),
+      settingsHeading: text("#settings-heading"),
+      profileNameLabel: text("label[for='profile-name']"),
+      profileNamePlaceholder: attr("#profile-name", "placeholder"),
+      profileNameAria: attr("#profile-name", "aria-label"),
+      saveSettingsText: text("#save-settings"),
+      saveSettingsTitle: attr("#save-settings", "title"),
+      bioText: document.querySelector("#bio")?.value,
+      bioPlaceholder: attr("#bio", "placeholder")
+    };
+  });
+}
+
+async function expectTranslated(page, selector, expected) {
+  await page.waitForFunction(
+    ({ selector, expected }) => document.querySelector(selector)?.textContent?.trim() === expected,
+    { selector, expected },
+    { timeout: 10000 }
+  );
+}
+
+function assertPairs(label, actual, checks) {
+  for (const [field, got, want] of checks) {
+    if (normalizeText(got) !== normalizeText(want)) {
+      fail(`${label} ${field}: expected ${JSON.stringify(want)}, got ${JSON.stringify(got)}`);
+    }
+  }
+}
+
 async function runSmoke() {
   let playwright;
   try {
@@ -84,82 +237,78 @@ async function runSmoke() {
       ]
     });
 
+    const translations = loadTranslations();
+    const t = (key) => requireTranslation(translations, key);
+
     const page = await context.newPage();
-    await page.route(testUrl, (route) => route.fulfill({
+    await page.route(`${baseUrl}/**`, (route) => {
+      const url = new URL(route.request().url());
+      return route.fulfill({
       status: 200,
       contentType: "text/html; charset=utf-8",
-      body: fixtureHtml()
-    }));
+      body: fixtureForPath(url.pathname)
+      });
+    });
 
-    await page.goto(testUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
-
-    const t = loadDefaultTranslations();
-    const expected = {
-      signIn: t["Sign in"],
-      pullRequests: t["Pull requests"],
-      issues: t.Issues,
-      save: t.Save,
-      searchGithub: t["Search GitHub"],
-      code: t.Code,
-      actions: t.Actions
-    };
-
-    for (const [key, value] of Object.entries(expected)) {
-      if (typeof value !== "string" || !value.trim()) {
-        fail(`Missing default translation for ${key}`);
-      }
-    }
-
-    await page.waitForFunction((value) => {
-      return document.querySelector("#sign-in")?.textContent?.trim() === value;
-    }, expected.signIn, { timeout: 10000 });
-
-    const actual = await page.evaluate(() => ({
-      signIn: document.querySelector("#sign-in")?.textContent?.trim(),
-      pullRequests: document.querySelector("#pull-requests")?.textContent?.trim(),
-      issues: document.querySelector("#issues")?.textContent?.trim(),
-      saveText: document.querySelector("#save")?.textContent?.trim(),
-      saveTitle: document.querySelector("#save")?.getAttribute("title"),
-      searchPlaceholder: document.querySelector("#search")?.getAttribute("placeholder"),
-      searchAria: document.querySelector("#search")?.getAttribute("aria-label"),
-      codeTab: document.querySelector("#code-tab")?.textContent?.trim(),
-      actionsTab: document.querySelector("#actions-tab")?.textContent?.trim(),
-      readme: document.querySelector("#readme")?.textContent?.replace(/\s+/g, " ").trim(),
-      comment: document.querySelector("#comment")?.textContent?.replace(/\s+/g, " ").trim(),
-      codeBlock: document.querySelector("#code-block")?.textContent?.replace(/\s+/g, " ").trim()
-    }));
-
-    const checks = [
-      ["header Sign in", actual.signIn, expected.signIn],
-      ["header Pull requests", actual.pullRequests, expected.pullRequests],
-      ["header Issues", actual.issues, expected.issues],
-      ["button text", actual.saveText, expected.save],
-      ["button title", actual.saveTitle, expected.save],
-      ["search placeholder", actual.searchPlaceholder, expected.searchGithub],
-      ["search aria-label", actual.searchAria, expected.searchGithub],
-      ["repo Code tab", actual.codeTab, expected.code],
-      ["repo Actions tab", actual.actionsTab, expected.actions]
-    ];
-
-    for (const [label, got, want] of checks) {
-      if (got !== want) {
-        fail(`${label}: expected ${JSON.stringify(want)}, got ${JSON.stringify(got)}`);
-      }
-    }
-
-    const untouchedChecks = [
+    await page.goto(`${baseUrl}/poberezkij/OctoRU`, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await expectTranslated(page, "#sign-in", t("Sign in"));
+    let actual = await collectPageState(page);
+    assertPairs("repo", actual, [
+      ["header Sign in", actual.signIn, t("Sign in")],
+      ["header Pull requests", actual.pullRequests, t("Pull requests")],
+      ["header Issues", actual.issues, t("Issues")],
+      ["button text", actual.saveText, t("Save")],
+      ["button title", actual.saveTitle, t("Save")],
+      ["search placeholder", actual.searchPlaceholder, t("Search GitHub")],
+      ["search aria-label", actual.searchAria, t("Search GitHub")],
+      ["repo Code tab", actual.codeTab, t("Code")],
+      ["repo Actions tab", actual.actionsTab, t("Actions")],
       ["README markdown body", actual.readme, "Sign in Save Pull requests Issues Code Save"],
       ["timeline comment", actual.comment, "Sign in Save Issues"],
       ["code block", actual.codeBlock, "Sign in Save Issues"]
-    ];
+    ]);
 
-    for (const [label, got, want] of untouchedChecks) {
-      if (got !== want) {
-        fail(`${label} should stay untouched: expected ${JSON.stringify(want)}, got ${JSON.stringify(got)}`);
-      }
-    }
+    await page.goto(`${baseUrl}/poberezkij/OctoRU/issues`, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await expectTranslated(page, "#issues-heading", t("Issues"));
+    actual = await collectPageState(page);
+    assertPairs("issues", actual, [
+      ["header Pull requests", actual.pullRequests, t("Pull requests")],
+      ["header Issues", actual.issues, t("Issues")],
+      ["header Notifications", actual.notifications, t("Notifications")],
+      ["heading", actual.issuesHeading, t("Issues")],
+      ["Open filter", actual.openFilter, t("Open")],
+      ["Closed filter", actual.closedFilter, t("Closed")],
+      ["Label filter", actual.labelFilter, t("Label")],
+      ["Milestone filter", actual.milestoneFilter, t("Milestone")],
+      ["New issue", actual.newIssue, t("New issue")],
+      ["empty hint", actual.emptyHint, `${t("Try adjusting your search filters")}.`],
+      ["contribution date", actual.contributionDate, "1 вклад 13 февраля"],
+      ["big file warning", actual.bigFileWarning, "Ого, это большой файл. Попробуйте ещё раз с файлом меньше 25 МБ"],
+      ["image size warning", actual.imageSizeWarning, "Изображения должны быть не меньше 320×320px (для лучшего отображения — 640×640px)"],
+      ["picture size warning", actual.pictureSizeWarning, "Пожалуйста, загрузите изображение меньше 10,000×10,000"],
+      ["issue title", actual.issueTitle, "Sign in Save Issues"]
+    ]);
 
-    console.log("OK: extension smoke passed (UI translated, user content untouched)");
+    await page.goto(`${baseUrl}/settings/profile`, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await expectTranslated(page, "#settings-heading", t("Settings"));
+    actual = await collectPageState(page);
+    assertPairs("settings", actual, [
+      ["profile link", actual.profileLink, t("Profile")],
+      ["sign out", actual.signOut, t("Sign out")],
+      ["settings menu", actual.settingsMenu, t("Settings")],
+      ["security menu", actual.securityMenu, t("Security")],
+      ["appearance menu", actual.appearanceMenu, t("Appearance")],
+      ["heading", actual.settingsHeading, t("Settings")],
+      ["name label", actual.profileNameLabel, t("Name")],
+      ["name placeholder", actual.profileNamePlaceholder, t("Name")],
+      ["name aria-label", actual.profileNameAria, t("Name")],
+      ["save button", actual.saveSettingsText, t("Save")],
+      ["save title", actual.saveSettingsTitle, t("Save")],
+      ["bio value", actual.bioText, "Sign in Save Issues"],
+      ["bio placeholder", actual.bioPlaceholder, "Save"]
+    ]);
+
+    console.log("OK: extension smoke passed (repo/issues/settings UI translated, user content untouched)");
   } catch (e) {
     const message = String(e?.message || e);
     if (/Executable doesn't exist|browserType\.launch/i.test(message) && process.env.CI !== "true") {

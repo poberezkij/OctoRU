@@ -78,3 +78,8 @@
 - 2026-03-04T12:10:43.840Z version=2026-03-04-2755-f69d022d14e3 keys=2755 hash=f69d022d14e3 source=bundled-dictionary.json
 - 2026-03-04T13:01:05.763Z version=2026-03-04-2761-7480d938e069 keys=2761 hash=7480d938e069 source=bundled-dictionary.json
 - 2026-03-04T13:02:47.327Z version=2026-03-04-2761-c00af8034360 keys=2761 hash=c00af8034360 source=bundled-dictionary.json
+- 2026-05-20T11:11:52.302Z version=2026-05-20-2765-ead4a7699dd8 keys=2765 hash=ead4a7699dd8 source=bundled-dictionary.json
+- 2026-05-20T11:15:21.565Z version=2026-05-20-2764-351324fb9e44 keys=2764 hash=351324fb9e44 source=bundled-dictionary.json
+- 2026-05-20T11:18:59.529Z version=2026-05-20-2759-64eddad82b1d keys=2759 hash=64eddad82b1d source=bundled-dictionary.json
+- 2026-05-20T11:51:54.651Z version=2026-05-20-2757-49d0f9918666 keys=2757 hash=49d0f9918666 source=bundled-dictionary.json
+- 2026-05-20T11:55:21.187Z version=2026-05-20-2761-ce8b154927ab keys=2761 hash=ce8b154927ab source=bundled-dictionary.json
