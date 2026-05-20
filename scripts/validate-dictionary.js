@@ -228,28 +228,23 @@ if (emptyPairs.length) {
 }
 
 if (lowercaseConflicts.length) {
-  let blockingLowercaseConflicts = 0;
-  for (const c of lowercaseConflicts.slice(0, 20)) {
+  const blockingConflicts = lowercaseConflicts.filter((c) => !isAllowlistedLowercaseConflict(c));
+  const allowlistedCount = lowercaseConflicts.length - blockingConflicts.length;
+
+  for (const c of blockingConflicts.slice(0, 20)) {
     warn(
       `Lowercase conflict "${c.lowered}": ` +
       `"${c.first.key}" => "${c.first.value}" vs "${c.second.key}" => "${c.second.value}"`
     );
-    if (isAllowlistedLowercaseConflict(c)) {
-      warn(`Allowlisted lowercase conflict: "${c.lowered}"`);
-    } else {
-      blockingLowercaseConflicts++;
-    }
   }
-  if (lowercaseConflicts.length > 20) {
-    warn(`...and ${lowercaseConflicts.length - 20} more lowercase conflicts`);
+  if (blockingConflicts.length > 20) {
+    warn(`...and ${blockingConflicts.length - 20} more lowercase conflicts`);
   }
-  if (lowercaseConflicts.length > 20) {
-    for (const c of lowercaseConflicts.slice(20)) {
-      if (!isAllowlistedLowercaseConflict(c)) blockingLowercaseConflicts++;
-    }
+  if (allowlistedCount) {
+    info(`Allowlisted lowercase conflicts: ${allowlistedCount}`);
   }
-  if (blockingLowercaseConflicts) {
-    errorCount += blockingLowercaseConflicts;
+  if (blockingConflicts.length) {
+    errorCount += blockingConflicts.length;
   }
 }
 
