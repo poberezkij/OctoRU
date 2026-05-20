@@ -6,6 +6,17 @@ const path = require("path");
 
 const dictPathArg = process.argv[2] || "bundled-dictionary.json";
 const dictPath = path.resolve(process.cwd(), dictPathArg);
+const baselinePathArg = process.argv[3] || "";
+const baselinePath = baselinePathArg ? path.resolve(process.cwd(), baselinePathArg) : "";
+
+const SUSPICIOUS_TYPES = ["email", "owner_repo", "token", "long"];
+const SLASH_FALSE_POSITIVES = new Set([
+  "and/or",
+  "day/night",
+  "input/output",
+  "price/unit",
+  "read/write"
+]);
 
 function fail(msg) {
   console.error(`ERROR: ${msg}`);
@@ -70,13 +81,30 @@ function toSection(key) {
 function looksSuspicious(key) {
   const t = String(key || "");
   if (/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(t)) return "email";
-  if (/\b[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\b/.test(t)) return "owner_repo";
+  const ownerRepoMatch = t.match(/\b[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\b/);
+  if (ownerRepoMatch && !SLASH_FALSE_POSITIVES.has(ownerRepoMatch[0].toLowerCase())) return "owner_repo";
   if (/^.{181,}$/.test(t)) return "long";
   if (/^\S+$/.test(t) && /[+#*]/.test(t)) return "token";
   return "";
 }
 
+function readQualityBaseline(filePath) {
+  if (!filePath) return null;
+  const baseline = readJsonObject(filePath, baselinePathArg);
+  const maxSuspicious = baseline.maxSuspicious || {};
+  const normalized = {};
+  for (const type of SUSPICIOUS_TYPES) {
+    const raw = maxSuspicious[type] == null ? 0 : maxSuspicious[type];
+    if (!Number.isInteger(raw) || raw < 0) {
+      fail(`${baselinePathArg}: maxSuspicious.${type} must be a non-negative integer`);
+    }
+    normalized[type] = raw;
+  }
+  return { maxSuspicious: normalized };
+}
+
 const dict = readJsonObject(dictPath, dictPathArg);
+const baseline = readQualityBaseline(baselinePath);
 const rows = [];
 for (const [key, value] of Object.entries(dict)) {
   if (isCommentKey(key)) continue;
@@ -91,10 +119,14 @@ for (const [key, value] of Object.entries(dict)) {
 }
 
 const counts = { repo_home: 0, issues: 0, pr: 0, settings: 0, other: 0 };
+const suspiciousCounts = { email: 0, owner_repo: 0, token: 0, long: 0 };
 let suspiciousCount = 0;
 for (const row of rows) {
   counts[row.section] += 1;
-  if (row.suspicious) suspiciousCount += 1;
+  if (row.suspicious) {
+    suspiciousCount += 1;
+    suspiciousCounts[row.suspicious] += 1;
+  }
 }
 
 console.log(`QUALITY SUMMARY: total=${rows.length} suspicious=${suspiciousCount}`);
@@ -102,7 +134,29 @@ for (const section of ["repo_home", "issues", "pr", "settings", "other"]) {
   console.log(`${section}: ${counts[section]}`);
 }
 
-if (suspiciousCount) {
+console.log(
+  `suspicious by type: ${SUSPICIOUS_TYPES.map((type) => `${type}=${suspiciousCounts[type]}`).join(", ")}`
+);
+
+if (baseline) {
+  const failures = [];
+  for (const type of SUSPICIOUS_TYPES) {
+    const actual = suspiciousCounts[type];
+    const max = baseline.maxSuspicious[type];
+    if (actual > max) failures.push(`${type}: ${actual}/${max}`);
+  }
+
+  if (failures.length) {
+    console.error(`QUALITY GATE FAILED: suspicious counts exceeded ${baselinePathArg}`);
+    for (const failure of failures) console.error(`- ${failure}`);
+    const firstProblemType = failures[0].split(":")[0];
+    const firstProblem = rows.find((row) => row.suspicious === firstProblemType);
+    if (firstProblem) console.error(`First ${firstProblemType}: ${firstProblem.key}`);
+    process.exit(1);
+  }
+
+  console.log(`QUALITY GATE: suspicious counts within ${baselinePathArg}`);
+} else if (suspiciousCount) {
   console.log("\nSUSPICIOUS SAMPLE:");
   for (const row of rows.filter((r) => r.suspicious).slice(0, 25)) {
     console.log(`- [${row.suspicious}] ${row.key}`);

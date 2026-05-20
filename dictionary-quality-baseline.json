@@ -1,0 +1,9 @@
+{
+  "//": "Ratcheting limits for dictionary quality lint. Lower these numbers as long exact keys are moved to dynamic rules or removed.",
+  "maxSuspicious": {
+    "email": 0,
+    "owner_repo": 0,
+    "token": 0,
+    "long": 26
+  }
+}
