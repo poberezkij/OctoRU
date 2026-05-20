@@ -1,0 +1,70 @@
+name: Баг расширения
+description: Сообщить о поломке, регрессии или неправильном поведении OctoRU
+title: "[bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Что случилось?
+      description: Коротко опишите проблему.
+      placeholder: Расширение переводит комментарии в issue, хотя должен переводиться только UI.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги воспроизведения
+      description: Укажите минимальный сценарий, по которому проблему можно повторить.
+      placeholder: |
+        1. Открыть ...
+        2. Нажать ...
+        3. Увидеть ...
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Страница GitHub
+      description: URL или тип страницы, где проявляется проблема.
+      placeholder: https://github.com/owner/repo/issues/1
+    validations:
+      required: false
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Браузер
+      options:
+        - Chrome
+        - Chromium
+        - Edge
+        - Другой Chromium-браузер
+    validations:
+      required: true
+  - type: input
+    id: extension-version
+    attributes:
+      label: Версия OctoRU
+      placeholder: "2.1.6"
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Фактическое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Дополнительный контекст
+      description: Скриншоты, console errors, настройки расширения, включён ли строгий UI-only режим.
+    validations:
+      required: false
