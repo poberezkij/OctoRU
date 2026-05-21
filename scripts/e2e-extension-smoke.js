@@ -129,6 +129,11 @@ function settingsFixtureHtml() {
       <label for="profile-name">Name</label>
       <input id="profile-name" type="text" placeholder="Name" aria-label="Name">
       <button id="save-settings" title="Save">Save</button>
+      <p id="template-gmt" role="status">(GMT+3:00) Moscow</p>
+      <p id="template-price" role="status">($0.3 USD per request)</p>
+      <p id="template-owner" role="status">poberezkij, Owner (AdminUser)</p>
+      <p id="template-starred" role="status">123 users starred this repository</p>
+      <p id="template-updated" role="status">(Updated 5/2026)</p>
       <textarea id="bio" placeholder="Save">Sign in Save Issues</textarea>
     </section>
   </main>
@@ -195,6 +200,11 @@ async function collectPageState(page) {
       profileNameAria: attr("#profile-name", "aria-label"),
       saveSettingsText: text("#save-settings"),
       saveSettingsTitle: attr("#save-settings", "title"),
+      templateGmt: text("#template-gmt"),
+      templatePrice: text("#template-price"),
+      templateOwner: text("#template-owner"),
+      templateStarred: text("#template-starred"),
+      templateUpdated: text("#template-updated"),
       bioText: document.querySelector("#bio")?.value,
       bioPlaceholder: attr("#bio", "placeholder")
     };
@@ -304,6 +314,11 @@ async function runSmoke() {
       ["name aria-label", actual.profileNameAria, t("Name")],
       ["save button", actual.saveSettingsText, t("Save")],
       ["save title", actual.saveSettingsTitle, t("Save")],
+      ["GMT template", actual.templateGmt, t("(GMT+{N}:{N}) Moscow").replace("{N}", "3").replace("{N}", "00")],
+      ["price template", actual.templatePrice, t("(${N}.{N} USD per request)").replace("{N}", "0").replace("{N}", "3")],
+      ["owner template", actual.templateOwner, t("{USERNAME}, Owner (USERNAME)").replace("{USERNAME}", "poberezkij").replace("(USERNAME)", "(AdminUser)")],
+      ["starred template", actual.templateStarred, t("{N} users starred this repository").replace("{N}", "123")],
+      ["updated template", actual.templateUpdated, t("(Updated {N}/{YEAR})").replace("{N}", "5").replace("{YEAR}", "2026")],
       ["bio value", actual.bioText, "Sign in Save Issues"],
       ["bio placeholder", actual.bioPlaceholder, "Save"]
     ]);
