@@ -20,11 +20,12 @@
     "test:e2e:smoke": "node scripts/e2e-smoke.js",
     "test:e2e:extension": "node scripts/e2e-extension-smoke.js",
     "test:dynamic-rules": "node scripts/test-dynamic-rules.js",
+    "test:release-zip": "node scripts/test-release-zip.js",
     "test:boundaries": "node scripts/test-boundary-fixtures.js",
     "test:dict-version": "node scripts/test-dict-version-idempotent.js",
     "test:dict-quality-lint": "node scripts/test-dict-quality-lint.js",
     "version:check": "node scripts/check-version-sync.js",
-    "release:check": "npm run version:check && npm run dev:check && npm run test:e2e:smoke && npm run test:e2e:extension",
+    "release:check": "npm run version:check && npm run dev:check && npm run test:e2e:smoke && npm run test:e2e:extension && npm run test:release-zip",
     "release:zip": "npm run version:check && node scripts/release-zip.js",
     "release:prepare": "node scripts/release-prepare.js"
   },
