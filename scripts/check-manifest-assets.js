@@ -43,6 +43,10 @@ function addIconFiles(files, icons) {
 
 const rootDir = process.cwd();
 const manifest = readJsonObject(path.resolve(rootDir, "manifest.json"), "manifest.json");
+const releaseFiles = JSON.parse(fs.readFileSync(path.resolve(rootDir, "release-files.json"), "utf8"));
+if (!Array.isArray(releaseFiles) || releaseFiles.some((file) => typeof file !== "string" || !file.trim())) {
+  fail("release-files.json must be an array of non-empty file paths");
+}
 const runtimeFiles = [
   "bundled-dictionary.json",
   "dict-version.json"
@@ -90,6 +94,21 @@ const missing = Array.from(referencedFiles)
 
 if (missing.length) {
   fail(`Manifest references missing file(s): ${missing.join(", ")}`);
+}
+
+const releaseSet = new Set(releaseFiles);
+const missingFromRelease = Array.from(referencedFiles)
+  .filter((file) => !releaseSet.has(file))
+  .sort((a, b) => a.localeCompare(b));
+if (missingFromRelease.length) {
+  fail(`Runtime asset(s) missing from release-files.json: ${missingFromRelease.join(", ")}`);
+}
+
+const missingReleaseFiles = releaseFiles
+  .filter((file) => !fs.existsSync(path.resolve(rootDir, file)))
+  .sort((a, b) => a.localeCompare(b));
+if (missingReleaseFiles.length) {
+  fail(`release-files.json references missing file(s): ${missingReleaseFiles.join(", ")}`);
 }
 
 console.log(`OK: extension assets exist (${referencedFiles.size} file(s))`);

@@ -2,9 +2,14 @@
   "name": "octoru-github-na-russkom",
   "version": "2.1.6",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "dict:build": "node scripts/build-dictionary.js __empty__ dict-sections bundled-dictionary.json && node scripts/update-dict-version.js bundled-dictionary.json dict-version.json dict-changelog.md",
-    "dict:check": "npm run dict:build && node scripts/validate-dictionary.js bundled-dictionary.json && node scripts/lint-dictionary-strict.js bundled-dictionary.json",
+    "default:build": "node scripts/build-default-translations.js",
+    "default:check": "node scripts/build-default-translations.js --check",
+    "dict:build": "node scripts/build-dictionary.js __empty__ dict-sections bundled-dictionary.json && npm run default:build && node scripts/update-dict-version.js bundled-dictionary.json dict-version.json dict-changelog.md",
+    "dict:check": "npm run dict:build && npm run default:check && node scripts/validate-dictionary.js bundled-dictionary.json && node scripts/lint-dictionary-strict.js bundled-dictionary.json",
     "dict:lint:strict": "node scripts/lint-dictionary-strict.js bundled-dictionary.json",
     "dict:lint:quality": "node scripts/dict-quality-lint.js bundled-dictionary.json dictionary-quality-baseline.json",
     "dict:cleanup": "node scripts/dict-cleanup.js incoming-translations.json incoming-translations.cleaned.json",
@@ -13,9 +18,9 @@
     "dict:normalize:style": "node scripts/normalize-dictionary-style.js dict-sections --write && npm run dict:build",
     "dict:audit:ru": "node scripts/audit-ru-translations.js bundled-dictionary.json translation-audit-report.json",
     "dict:cycle": "npm run dict:cleanup && npm run dict:stage && npm run dict:import && npm run dict:check && npm run dict:lint:quality",
-    "syntax:check": "node --check background.js && node --check content-dynamic-rules.js && node --check content.js && node --check options.js && node --check report-utils.js && node --check popup.js",
+    "syntax:check": "node --check background.js && node --check content-dynamic-rules.js && node --check content.js && node --check options.js && node --check report-utils.js && node --check popup.js && node --check scripts/build-default-translations.js",
     "manifest:check": "node scripts/check-manifest-assets.js",
-    "coverage:gate": "node scripts/check-ui-coverage-gate.js bundled-dictionary.json coverage-baseline.json 90 100",
+    "coverage:gate": "node scripts/check-ui-coverage-gate.js bundled-dictionary.json coverage-baseline.json 100 100",
     "dev:check": "npm run syntax:check && npm run manifest:check && npm run test:boundaries && npm run test:dynamic-rules && npm run test:popup-report && npm run test:dict-version && npm run test:dict-quality-lint && npm run dict:check && npm run coverage:gate && npm run dict:lint:quality",
     "test:e2e:smoke": "node scripts/e2e-smoke.js",
     "test:e2e:extension": "node scripts/e2e-extension-smoke.js",
@@ -31,6 +36,6 @@
     "release:prepare": "node scripts/release-prepare.js"
   },
   "devDependencies": {
-    "playwright": "^1.49.0"
+    "playwright": "^1.62.1"
   }
 }

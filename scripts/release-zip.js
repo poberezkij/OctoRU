@@ -5,22 +5,8 @@ const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
 
-const FILES = [
-  "manifest.json",
-  "background.js",
-  "content.js",
-  "content-dynamic-rules.js",
-  "default-translations.js",
-  "options.html",
-  "options.js",
-  "popup.html",
-  "report-utils.js",
-  "popup.js",
-  "bundled-dictionary.json",
-  "dict-version.json",
-  "icon48.png",
-  "icon128.png"
-];
+const releaseFilesPath = path.resolve(process.cwd(), "release-files.json");
+const FILES = JSON.parse(fs.readFileSync(releaseFilesPath, "utf8"));
 
 function fail(msg) {
   console.error(`ERROR: ${msg}`);
@@ -60,6 +46,10 @@ function escapePsSingleQuoted(s) {
 }
 
 const rootDir = process.cwd();
+if (!Array.isArray(FILES) || FILES.some((file) => typeof file !== "string" || !file.trim())) {
+  fail("release-files.json must be an array of non-empty file paths");
+}
+if (new Set(FILES).size !== FILES.length) fail("release-files.json contains duplicate paths");
 const pkg = readJsonObject(path.resolve(rootDir, "package.json"), "package.json");
 const manifest = readJsonObject(path.resolve(rootDir, "manifest.json"), "manifest.json");
 

@@ -128,7 +128,10 @@ const veryLongKeys = [];
 const lowercaseMap = new Map();
 const lowercaseConflicts = [];
 const ALLOWED_LOWERCASE_CONFLICT_KEYS = {
+  files: new Set(["Files", "files"]),
   forks: new Set(["Forks", "forks"]),
+  readme: new Set(["README", "Readme"]),
+  stars: new Set(["Stars", "stars"]),
   watching: new Set(["Watching", "watching"])
 };
 

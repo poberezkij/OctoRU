@@ -56,7 +56,9 @@
 ## 🏗️ Для разработчиков
 Ключевые команды:
 - `npm run dict:build` — сборка словаря из `dict-sections`
+- `npm run default:check` — проверка, что встроенный fallback сгенерирован из `dict-sections/05-bootstrap.json`
 - `npm run dict:check` — сборка + валидация + strict lint
+- `npm run coverage:gate` — проверка 100% покрытия эталонных экранов GitHub
 - `npm run dict:lint:quality` — quality-проверка словаря с ratchet-baseline для suspicious-ключей
 - `npm run dev:check` — полный локальный check словаря и рантайма
 - `npm run release:check` — release-check c e2e smoke
@@ -68,7 +70,9 @@
 - `background.js` — состояние, storage, служебные команды
 - `options.*`, `popup.*` — UI расширения
 - `dict-sections/*.json` — исходники словаря
+- `dict-sections/05-bootstrap.json` — единый источник встроенного fallback-словаря
 - `bundled-dictionary.json` — собранный словарь
+- `release-files.json` — точный allowlist файлов релизного ZIP
 - `dictionary-quality-baseline.json` — лимиты качества словаря, которые нужно постепенно снижать
 
 ## 💖 Поддержка проекта

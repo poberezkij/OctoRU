@@ -8,21 +8,9 @@ const { execFileSync } = require("child_process");
 const rootDir = path.resolve(__dirname, "..");
 const releaseZipScript = path.resolve(rootDir, "scripts", "release-zip.js");
 
-const EXPECTED_FILES = [
-  "manifest.json",
-  "background.js",
-  "content.js",
-  "content-dynamic-rules.js",
-  "default-translations.js",
-  "options.html",
-  "options.js",
-  "popup.html",
-  "popup.js",
-  "bundled-dictionary.json",
-  "dict-version.json",
-  "icon48.png",
-  "icon128.png"
-];
+const EXPECTED_FILES = JSON.parse(
+  fs.readFileSync(path.resolve(rootDir, "release-files.json"), "utf8")
+);
 
 function fail(msg) {
   console.error(`ERROR: ${msg}`);

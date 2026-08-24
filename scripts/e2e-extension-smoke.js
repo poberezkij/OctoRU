@@ -278,6 +278,29 @@ async function runSmoke() {
       ["code block", actual.codeBlock, "Sign in Save Issues"]
     ]);
 
+    await page.evaluate(() => {
+      const wrapper = document.createElement("div");
+      wrapper.id = "dynamic-batch";
+      wrapper.className = "flash";
+      for (let index = 0; index < 100; index += 1) {
+        const row = document.createElement("div");
+        const button = document.createElement("button");
+        button.className = "btn dynamic-save";
+        button.textContent = "Save";
+        row.appendChild(button);
+        wrapper.appendChild(row);
+      }
+      document.body.appendChild(wrapper);
+    });
+    await page.waitForFunction(
+      (expected) => Array.from(document.querySelectorAll(".dynamic-save"))
+        .every((button) => button.textContent?.trim() === expected),
+      t("Save"),
+      { timeout: 10000 }
+    );
+    const dynamicCount = await page.locator(".dynamic-save").count();
+    if (dynamicCount !== 100) fail(`dynamic mutation fixture expected 100 buttons, got ${dynamicCount}`);
+
     await page.goto(`${baseUrl}/poberezkij/OctoRU/issues`, { waitUntil: "domcontentloaded", timeout: 45000 });
     await expectTranslated(page, "#issues-heading", t("Issues"));
     actual = await collectPageState(page);

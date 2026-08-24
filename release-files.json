@@ -1,0 +1,16 @@
+[
+  "manifest.json",
+  "background.js",
+  "content.js",
+  "content-dynamic-rules.js",
+  "default-translations.js",
+  "options.html",
+  "options.js",
+  "popup.html",
+  "report-utils.js",
+  "popup.js",
+  "bundled-dictionary.json",
+  "dict-version.json",
+  "icon48.png",
+  "icon128.png"
+]

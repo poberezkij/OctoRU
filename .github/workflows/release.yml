@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "20"
           cache: "npm"
@@ -48,7 +48,7 @@ jobs:
 
       - name: Create GitHub Release
         if: ${{ steps.notes.outputs.path != '' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           name: "OctoRU ${{ github.ref_name }}"
           draft: false
@@ -59,7 +59,7 @@ jobs:
 
       - name: Create GitHub Release (no notes file)
         if: ${{ steps.notes.outputs.path == '' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           name: "OctoRU ${{ github.ref_name }}"
           draft: false

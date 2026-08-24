@@ -1,7 +1,6 @@
-// Generated from dict-sections/05-bootstrap.json. Do not edit manually.
-// This small dictionary keeps critical UI translations available during startup.
-
-window.GHRU_DEFAULT_TRANSLATIONS = {
+{
+  "// section": "",
+  "// Keep this section small and context-safe.": "",
   "[repo_home] .gitignore": ".gitignore",
   "[repo_home] and": "и",
   "[repo_home] creating a new file": "создания нового файла",
@@ -117,8 +116,8 @@ window.GHRU_DEFAULT_TRANSLATIONS = {
   "Profile": "Профиль",
   "Projects": "Проекты",
   "Pull requests": "Запросы на слияние",
-  "Readme": "README",
   "README": "README",
+  "Readme": "README",
   "Releases": "Релизы",
   "Report repository": "Пожаловаться на репозиторий",
   "Repositories": "Репозитории",
@@ -168,7 +167,4 @@ window.GHRU_DEFAULT_TRANSLATIONS = {
   "Your projects": "Ваши проекты",
   "Your repositories": "Ваши репозитории",
   "Your stars": "Ваши звёзды"
-};
-
-// Glossary mode: keep disabled to avoid noisy UI labels.
-window.GHRU_GLOSSARY_TERMS = {};
+}

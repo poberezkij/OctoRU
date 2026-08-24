@@ -903,7 +903,15 @@ const RELATIVE_TIME_SINGLE_TRANSLATIONS = new Map([
   ["yesterday", "вчера"]
 ]);
 
-const OBSERVED_RELATIVE_TIME_SHADOW_ROOTS = new WeakSet();
+const RELATIVE_TIME_SHADOW_OBSERVERS = new Map();
+
+function disconnectRelativeTimeShadowObservers(disconnectedOnly = false) {
+  for (const [shadow, entry] of RELATIVE_TIME_SHADOW_OBSERVERS) {
+    if (disconnectedOnly && entry.host?.isConnected) continue;
+    entry.observer.disconnect();
+    RELATIVE_TIME_SHADOW_OBSERVERS.delete(shadow);
+  }
+}
 
 function pluralRu(count, one, few, many) {
   const n = Math.abs(Number(count)) % 100;
@@ -993,6 +1001,7 @@ function canTranslateOutsideUi(base, el) {
 
 function localizeRelativeTimeElements(root) {
   if (!root) return;
+  disconnectRelativeTimeShadowObservers(true);
   const selector = "relative-time, time-ago, time-until, local-time";
   const nodes = [];
 
@@ -1010,10 +1019,10 @@ function localizeRelativeTimeElements(root) {
     localizeRelativeTimeShadowText(el);
 
     const shadow = el.shadowRoot;
-    if (shadow && !OBSERVED_RELATIVE_TIME_SHADOW_ROOTS.has(shadow)) {
-      OBSERVED_RELATIVE_TIME_SHADOW_ROOTS.add(shadow);
+    if (shadow && !RELATIVE_TIME_SHADOW_OBSERVERS.has(shadow)) {
       const shadowObserver = new MutationObserver(() => localizeRelativeTimeShadowText(el));
       shadowObserver.observe(shadow, { childList: true, subtree: true, characterData: true });
+      RELATIVE_TIME_SHADOW_OBSERVERS.set(shadow, { observer: shadowObserver, host: el });
     }
   }
 }
@@ -1510,6 +1519,14 @@ function queueTranslate(node) {
     if (!hasAllowedDescendant && !settings.collectUntranslated) return;
   }
 
+  for (const queued of Array.from(queue)) {
+    if (!queued?.isConnected) {
+      queue.delete(queued);
+      continue;
+    }
+    if (queued === el || queued.contains(el)) return;
+    if (el.contains(queued)) queue.delete(queued);
+  }
   queue.add(el);
   if (flushTimer) return;
 
@@ -1608,6 +1625,7 @@ function stopObserver() {
   clearUntranslatedQueue();
   clearCoverageQueue();
   clearCollectorDebugQueue();
+  disconnectRelativeTimeShadowObservers();
   clearContextCaches();
 }
 

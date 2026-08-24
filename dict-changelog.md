@@ -1,81 +1,43 @@
 # Dictionary Changelog
 
+> Содержит только уникальные состояния словаря; повторные технические сборки исключены.
+
 - 2026-02-13T14:01:50.771Z version=2026-02-13-2151-d8c3cff80860 keys=2151 hash=d8c3cff80860 source=bundled-dictionary.json
-- 2026-02-13T14:01:52.418Z version=2026-02-13-2151-d8c3cff80860 keys=2151 hash=d8c3cff80860 source=bundled-dictionary.json
-- 2026-02-13T14:04:57.020Z version=2026-02-13-2151-d8c3cff80860 keys=2151 hash=d8c3cff80860 source=bundled-dictionary.json
-- 2026-02-13T14:04:58.689Z version=2026-02-13-2151-d8c3cff80860 keys=2151 hash=d8c3cff80860 source=bundled-dictionary.json
 - 2026-02-13T14:09:55.205Z version=2026-02-13-2151-61b26230b984 keys=2151 hash=61b26230b984 source=bundled-dictionary.json
 - 2026-02-13T14:11:03.022Z version=2026-02-13-2151-adcf74dd7dd1 keys=2151 hash=adcf74dd7dd1 source=bundled-dictionary.json
-- 2026-02-13T14:11:29.648Z version=2026-02-13-2151-adcf74dd7dd1 keys=2151 hash=adcf74dd7dd1 source=bundled-dictionary.json
-- 2026-02-13T14:11:31.189Z version=2026-02-13-2151-adcf74dd7dd1 keys=2151 hash=adcf74dd7dd1 source=bundled-dictionary.json
-- 2026-02-13T14:30:08.880Z version=2026-02-13-2151-adcf74dd7dd1 keys=2151 hash=adcf74dd7dd1 source=bundled-dictionary.json
-- 2026-02-13T14:30:10.690Z version=2026-02-13-2151-adcf74dd7dd1 keys=2151 hash=adcf74dd7dd1 source=bundled-dictionary.json
 - 2026-02-13T14:41:24.965Z source=incoming-translations.json target=dict-sections/13-repo-issues-pr.json added=266 updated=0 skipped=0 conflicts=0 suspicious=15 clear_source=false
 - 2026-02-13T14:41:25.384Z version=2026-02-13-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
-- 2026-02-13T14:48:49.282Z version=2026-02-13-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
-- 2026-02-13T14:48:50.946Z version=2026-02-13-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
-- 2026-02-13T14:53:45.035Z version=2026-02-13-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
-- 2026-02-13T14:56:26.347Z version=2026-02-13-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
-- 2026-02-13T15:06:58.078Z version=2026-02-13-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
-- 2026-02-13T15:07:23.762Z version=2026-02-13-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
-- 2026-02-13T15:07:25.369Z version=2026-02-13-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
-- 2026-02-14T06:48:30.572Z version=2026-02-14-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
-- 2026-02-14T06:48:32.094Z version=2026-02-14-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
-- 2026-02-14T06:59:43.352Z version=2026-02-14-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
-- 2026-02-14T07:20:21.212Z version=2026-02-14-2417-99cadeca1613 keys=2417 hash=99cadeca1613 source=bundled-dictionary.json
 - 2026-02-14T07:24:59.084Z version=2026-02-14-2417-00c21ade205c keys=2417 hash=00c21ade205c source=bundled-dictionary.json
-- 2026-02-14T07:25:10.356Z version=2026-02-14-2417-00c21ade205c keys=2417 hash=00c21ade205c source=bundled-dictionary.json
-- 2026-02-14T07:26:02.280Z version=2026-02-14-2417-00c21ade205c keys=2417 hash=00c21ade205c source=bundled-dictionary.json
 - 2026-02-14T07:29:49.851Z version=2026-02-14-2417-29760272fb46 keys=2417 hash=29760272fb46 source=bundled-dictionary.json
-- 2026-02-14T07:29:59.428Z version=2026-02-14-2417-29760272fb46 keys=2417 hash=29760272fb46 source=bundled-dictionary.json
 - 2026-02-14T07:30:46.367Z version=2026-02-14-2417-68fd4ea75a29 keys=2417 hash=68fd4ea75a29 source=bundled-dictionary.json
-- 2026-02-14T07:31:02.166Z version=2026-02-14-2417-68fd4ea75a29 keys=2417 hash=68fd4ea75a29 source=bundled-dictionary.json
 - 2026-02-14T07:33:40.385Z version=2026-02-14-2417-50cd0ab68b02 keys=2417 hash=50cd0ab68b02 source=bundled-dictionary.json
-- 2026-02-14T07:33:59.876Z version=2026-02-14-2417-50cd0ab68b02 keys=2417 hash=50cd0ab68b02 source=bundled-dictionary.json
-- 2026-02-14T07:40:14.385Z version=2026-02-14-2417-50cd0ab68b02 keys=2417 hash=50cd0ab68b02 source=bundled-dictionary.json
-- 2026-02-14T07:40:24.855Z version=2026-02-14-2417-50cd0ab68b02 keys=2417 hash=50cd0ab68b02 source=bundled-dictionary.json
-- 2026-02-14T07:41:01.332Z version=2026-02-14-2417-50cd0ab68b02 keys=2417 hash=50cd0ab68b02 source=bundled-dictionary.json
-- 2026-02-14T07:41:03.523Z version=2026-02-14-2417-50cd0ab68b02 keys=2417 hash=50cd0ab68b02 source=bundled-dictionary.json
 - 2026-02-14T07:52:30.937Z version=2026-02-14-2422-8b1c750188b6 keys=2422 hash=8b1c750188b6 source=bundled-dictionary.json
-- 2026-02-14T07:52:32.770Z version=2026-02-14-2422-8b1c750188b6 keys=2422 hash=8b1c750188b6 source=bundled-dictionary.json
 - 2026-02-14T07:56:11.531Z version=2026-02-14-2436-8d6374654d94 keys=2436 hash=8d6374654d94 source=bundled-dictionary.json
-- 2026-02-14T07:56:13.351Z version=2026-02-14-2436-8d6374654d94 keys=2436 hash=8d6374654d94 source=bundled-dictionary.json
 - 2026-02-14T08:00:00.524Z version=2026-02-14-2436-7da4775d5d55 keys=2436 hash=7da4775d5d55 source=bundled-dictionary.json
-- 2026-02-14T08:00:02.340Z version=2026-02-14-2436-7da4775d5d55 keys=2436 hash=7da4775d5d55 source=bundled-dictionary.json
-- 2026-02-14T08:02:33.419Z version=2026-02-14-2436-7da4775d5d55 keys=2436 hash=7da4775d5d55 source=bundled-dictionary.json
 - 2026-02-14T08:04:38.561Z version=2026-02-14-2439-175ea52e6046 keys=2439 hash=175ea52e6046 source=bundled-dictionary.json
-- 2026-02-14T08:04:51.772Z version=2026-02-14-2439-175ea52e6046 keys=2439 hash=175ea52e6046 source=bundled-dictionary.json
 - 2026-02-14T08:08:20.208Z version=2026-02-14-2439-1da85be07b2a keys=2439 hash=1da85be07b2a source=bundled-dictionary.json
 - 2026-02-14T08:08:57.416Z version=2026-02-14-2439-8fe070f615c1 keys=2439 hash=8fe070f615c1 source=bundled-dictionary.json
 - 2026-02-14T08:28:16.798Z version=2026-02-14-2439-9ef77733900a keys=2439 hash=9ef77733900a source=bundled-dictionary.json
-- 2026-02-14T08:28:17.305Z version=2026-02-14-2439-9ef77733900a keys=2439 hash=9ef77733900a source=bundled-dictionary.json
 - 2026-02-14T08:42:42.517Z version=2026-02-14-2438-c94b162b3e11 keys=2438 hash=c94b162b3e11 source=bundled-dictionary.json
 - 2026-02-14T08:43:06.432Z version=2026-02-14-2437-a49d7b9d4626 keys=2437 hash=a49d7b9d4626 source=bundled-dictionary.json
 - 2026-02-14T08:44:07.066Z version=2026-02-14-2437-bd7d11056095 keys=2437 hash=bd7d11056095 source=bundled-dictionary.json
 - 2026-02-14T08:45:21.497Z version=2026-02-14-2437-8227fbe7fd02 keys=2437 hash=8227fbe7fd02 source=bundled-dictionary.json
-- 2026-02-14T08:46:09.812Z version=2026-02-14-2437-8227fbe7fd02 keys=2437 hash=8227fbe7fd02 source=bundled-dictionary.json
-- 2026-02-14T08:48:07.516Z version=2026-02-14-2437-8227fbe7fd02 keys=2437 hash=8227fbe7fd02 source=bundled-dictionary.json
-- 2026-02-14T08:58:41.040Z version=2026-02-14-2437-8227fbe7fd02 keys=2437 hash=8227fbe7fd02 source=bundled-dictionary.json
 - 2026-02-14T09:35:21.490Z source=incoming-translations.json target=dict-sections/01-base.json added=251 updated=0 skipped=0 conflicts=0 suspicious=3 clear_source=false
 - 2026-02-14T09:35:22.113Z version=2026-02-14-2688-cac2a931a797 keys=2688 hash=cac2a931a797 source=bundled-dictionary.json
-- 2026-02-14T09:35:40.319Z version=2026-02-14-2688-cac2a931a797 keys=2688 hash=cac2a931a797 source=bundled-dictionary.json
-- 2026-02-14T09:48:33.108Z version=2026-02-14-2688-cac2a931a797 keys=2688 hash=cac2a931a797 source=bundled-dictionary.json
 - 2026-02-14T09:53:28.744Z version=2026-02-14-2684-b6d860f55e91 keys=2684 hash=b6d860f55e91 source=bundled-dictionary.json
 - 2026-02-14T10:00:09.242Z source=incoming-translations.json target=dict-sections/01-base.json added=18 updated=0 skipped=0 conflicts=0 suspicious=3 clear_source=false
 - 2026-02-14T10:00:09.883Z version=2026-02-14-2702-46cc79057fd2 keys=2702 hash=46cc79057fd2 source=bundled-dictionary.json
 - 2026-02-14T10:01:01.240Z version=2026-02-14-2701-81c58c00dd1d keys=2701 hash=81c58c00dd1d source=bundled-dictionary.json
-- 2026-02-14T10:40:03.240Z version=2026-02-14-2701-81c58c00dd1d keys=2701 hash=81c58c00dd1d source=bundled-dictionary.json
 - 2026-02-14T10:44:11.706Z version=2026-02-14-2701-710ef9799f90 keys=2701 hash=710ef9799f90 source=bundled-dictionary.json
-- 2026-02-14T10:44:12.070Z version=2026-02-14-2701-710ef9799f90 keys=2701 hash=710ef9799f90 source=bundled-dictionary.json
 - 2026-02-14T12:01:07.401Z version=2026-02-14-2717-8f896b0d86f3 keys=2717 hash=8f896b0d86f3 source=bundled-dictionary.json
 - 2026-02-14T12:02:11.344Z version=2026-02-14-2717-0583cdfdb6bc keys=2717 hash=0583cdfdb6bc source=bundled-dictionary.json
 - 2026-02-14T12:45:18.599Z version=2026-02-14-2726-e7cee1d875c5 keys=2726 hash=e7cee1d875c5 source=bundled-dictionary.json
-- 2026-02-14T12:45:29.116Z version=2026-02-14-2726-e7cee1d875c5 keys=2726 hash=e7cee1d875c5 source=bundled-dictionary.json
 - 2026-02-14T12:48:24.436Z version=2026-02-14-2726-dba1bf8d1e3c keys=2726 hash=dba1bf8d1e3c source=bundled-dictionary.json
-- 2026-02-14T12:55:33.348Z version=2026-02-14-2726-dba1bf8d1e3c keys=2726 hash=dba1bf8d1e3c source=bundled-dictionary.json
 - 2026-02-17T05:34:59.104Z version=2026-02-17-2755-f69d022d14e3 keys=2755 hash=f69d022d14e3 source=bundled-dictionary.json
-- 2026-03-04T12:06:05.474Z version=2026-03-04-2755-f69d022d14e3 keys=2755 hash=f69d022d14e3 source=bundled-dictionary.json
-- 2026-03-04T12:10:43.840Z version=2026-03-04-2755-f69d022d14e3 keys=2755 hash=f69d022d14e3 source=bundled-dictionary.json
 - 2026-03-04T13:01:05.763Z version=2026-03-04-2761-7480d938e069 keys=2761 hash=7480d938e069 source=bundled-dictionary.json
 - 2026-03-04T13:02:47.327Z version=2026-03-04-2761-c00af8034360 keys=2761 hash=c00af8034360 source=bundled-dictionary.json
 - 2026-08-24T07:19:29.403Z version=2026-08-24-2782-1aeb71698e71 keys=2782 hash=1aeb71698e71 source=bundled-dictionary.json
+- 2026-08-24T08:01:22.096Z version=2026-08-24-2782-c588a44ba21f keys=2782 hash=c588a44ba21f source=bundled-dictionary.json
+- 2026-08-24T08:02:52.127Z version=2026-08-24-2926-978a367f47eb keys=2926 hash=978a367f47eb source=bundled-dictionary.json
+- 2026-08-24T08:06:57.553Z version=2026-08-24-2923-96cb1109e209 keys=2923 hash=96cb1109e209 source=bundled-dictionary.json
+- 2026-08-24T08:07:29.049Z version=2026-08-24-2924-213c9209dc79 keys=2924 hash=213c9209dc79 source=bundled-dictionary.json
