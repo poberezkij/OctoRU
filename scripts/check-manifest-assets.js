@@ -71,6 +71,19 @@ for (const file of runtimeFiles) {
   addFile(referencedFiles, file);
 }
 
+// Validate local scripts and styles referenced by extension HTML pages as well.
+for (const htmlFile of Array.from(referencedFiles).filter((file) => /\.html$/i.test(file))) {
+  const htmlPath = path.resolve(rootDir, htmlFile);
+  if (!fs.existsSync(htmlPath)) continue;
+  const html = fs.readFileSync(htmlPath, "utf8");
+  const assetPattern = /<(?:script|link)\b[^>]*(?:src|href)=["']([^"']+)["'][^>]*>/gi;
+  for (const match of html.matchAll(assetPattern)) {
+    const asset = String(match[1] || "").trim();
+    if (!asset || /^(?:https?:|data:|#|\/\/)/i.test(asset)) continue;
+    addFile(referencedFiles, path.posix.join(path.posix.dirname(htmlFile), asset));
+  }
+}
+
 const missing = Array.from(referencedFiles)
   .filter((file) => !fs.existsSync(path.resolve(rootDir, file)))
   .sort((a, b) => a.localeCompare(b));

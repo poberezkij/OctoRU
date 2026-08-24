@@ -1,11 +1,16 @@
 ﻿document.addEventListener('DOMContentLoaded', () => {
-  const MAINTAINER_PROFILE_URL = 'https://github.com/poberezkij';
-  const REPO_ISSUES_NEW_URL = 'https://github.com/poberezkij/OctoRU/issues/new';
-
   const toggle = document.getElementById('toggle');
   const status = document.getElementById('status');
   const openOptions = document.getElementById('openOptions');
   const reportUntranslated = document.getElementById('reportUntranslated');
+
+  function showReportStatus(text, timeout = 1800) {
+    if (!reportUntranslated) return;
+    reportUntranslated.textContent = text;
+    setTimeout(() => {
+      reportUntranslated.textContent = 'Сообщить о непереведенном тексте';
+    }, timeout);
+  }
 
   function setUi(isEnabled) {
     toggle.checked = isEnabled;
@@ -37,43 +42,28 @@
       const tab = (tabs || [])[0];
       const tabId = tab?.id;
       const url = tab?.url || 'https://github.com/';
-      if (!tabId) return;
+      if (!tabId) {
+        showReportStatus('Не удалось определить вкладку');
+        return;
+      }
 
       chrome.tabs.sendMessage(tabId, { type: 'ghruBuildUntranslatedReport' }, async (res) => {
-        const selected = String(res?.selectedText || '').trim();
-        const safeSelected = selected || '<вставьте текст>';
-
-        const reportText = [
-          'Непереведённый текст:',
-          safeSelected,
-          '',
-          'Страница:',
-          url,
-          '',
-          'Профиль:',
-          MAINTAINER_PROFILE_URL
-        ].join('\n');
-
-        // Формируем ссылку для создания Issue с заранее заполненным шаблоном.
-        const issueTitle = `Непереведённый текст: ${safeSelected.slice(0, 60)}`;
-        const issueBody = `${reportText}\n\nДополнительно:\n- Браузер: ${navigator.userAgent}`;
-        const issueUrl = `${REPO_ISSUES_NEW_URL}?${new URLSearchParams({
-          title: issueTitle,
-          body: issueBody
-        }).toString()}`;
+        const issue = globalThis.OctoRUReport?.buildUntranslatedIssue(
+          res?.selectedText,
+          res?.pageUrl || url,
+          navigator.userAgent
+        );
+        if (!issue) {
+          showReportStatus('Сначала выделите текст', 2400);
+          return;
+        }
 
         try {
-          await navigator.clipboard.writeText(reportText);
-          chrome.tabs.create({ url: issueUrl });
-          reportUntranslated.textContent = 'Скопировано';
-          setTimeout(() => {
-            reportUntranslated.textContent = 'Сообщить о непереведенном тексте';
-          }, 1200);
+          await navigator.clipboard.writeText(issue.reportText);
+          chrome.tabs.create({ url: issue.issueUrl });
+          showReportStatus('Скопировано', 1200);
         } catch {
-          reportUntranslated.textContent = 'Не удалось скопировать';
-          setTimeout(() => {
-            reportUntranslated.textContent = 'Сообщить о непереведенном тексте';
-          }, 1200);
+          showReportStatus('Не удалось скопировать');
         }
       });
     });

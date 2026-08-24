@@ -22,7 +22,7 @@
 - ✅ Поддержка динамических шаблонов (`{N}`, даты, счётчики)
 - ✅ Локальная работа без внешних API
 - ✅ Автоперевод на динамических страницах GitHub
-- ✅ Сбор непереведённых UI-строк для пополнения словаря
+- ✅ Опциональный сбор непереведённых UI-строк для пополнения словаря
 - ✅ Частотный отчёт непереведённых строк с контекстом (URL/source/selector)
 
 ## 🔎 Что переводит
@@ -60,7 +60,7 @@
 - `npm run dict:lint:quality` — quality-проверка словаря
 - `npm run dev:check` — полный локальный check словаря и рантайма
 - `npm run release:check` — release-check c e2e smoke
-- `npm run release:prepare -- 2.1.5` — bump версии + checks + zip одной командой
+- `npm run release:prepare -- <версия>` — bump версии + checks + zip одной командой
 
 Структура проекта:
 - `content.js` — рантайм-перевод на странице
@@ -95,9 +95,4 @@
 - Лицензия: `LICENSE`
 - Безопасность: `SECURITY.md`
 - Правила контрибьюта: `CONTRIBUTING.md`
-- Заметки релиза:
-  - `RELEASE_NOTES_v2.1.5.md`
-  - `RELEASE_NOTES_v2.1.3.md`
-  - `RELEASE_NOTES_v2.1.2.md`
-  - `RELEASE_NOTES_v2.1.1.md`
-  - `RELEASE_NOTES_v2.1.0.md`
+- История релизов: [GitHub Releases](https://github.com/poberezkij/OctoRU/releases)

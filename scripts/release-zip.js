@@ -14,6 +14,7 @@ const FILES = [
   "options.html",
   "options.js",
   "popup.html",
+  "report-utils.js",
   "popup.js",
   "bundled-dictionary.json",
   "dict-version.json",

@@ -7,7 +7,7 @@ const SETTINGS_DEFAULTS = {
   enabled: true,
   translateAttributes: true,
   glossaryMode: false,
-  collectUntranslated: true,
+  collectUntranslated: false,
   strictUiOnlyMode: true,
   collectorRelaxedMode: false,
   debugCollector: false,

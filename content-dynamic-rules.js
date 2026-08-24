@@ -71,6 +71,15 @@
 
     let m;
 
+    m = t.match(/^(\d+)\s*\/\s*(\d+)\s+complete$/i);
+    if (m) return `Выполнено ${m[1]} из ${m[2]}`;
+
+    m = t.match(/^Read\s*[\u00b7\u2022]\s*Est\.\s*(\d+)m$/i);
+    if (m) {
+      const n = parseInt(m[1], 10);
+      return `Читать · Примерно ${m[1]} ${ruPlural(n, "минута", "минуты", "минут")}`;
+    }
+
     m = t.match(/^([A-Za-z0-9_.-]{2,})\s+had no activity during this period\.?$/i);
     if (m) return m[1] + ": активности за этот период нет";
 
